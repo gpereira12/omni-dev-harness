@@ -6,7 +6,16 @@ always_use: false
 
 # ☁️ GCP DevOps & Infrastructure Standard
 
-## 1. Google Cloud Serverless Suite
+## 1. Hosting Platforms Decision Matrix (GCP vs Supabase vs Vercel vs Cloudflare)
+
+| Platform | When to Recommend | When NOT to Use |
+| :--- | :--- | :--- |
+| **Google Cloud (Cloud Run + Cloud SQL)** | Enterprise systems, heterogenous microservices, Pub/Sub messaging, full VPC security. | Quick prototypes with zero DevOps budget. |
+| **Vercel** | Next.js frontends with Edge Functions, rapid PR Preview Deploys, landing pages. | Long-running background workers or heavy compute tasks. |
+| **Supabase** | Rapid MVP/SaaS with PostgreSQL, Auth, Row Level Security (RLS), Realtime & Storage in 5 minutes. | Highly complex enterprise databases with massive legacy stored procedures. |
+| **Cloudflare Workers / Pages** | Ultra-low-latency edge applications (<20ms), edge KV storage, Cloudflare Queues. | Applications requiring full Node.js native C++ binary bindings. |
+
+## 2. Google Cloud Serverless Suite
 - **Compute**: Google Cloud Run (Auto-scale 0 to N, Concurrency = 80, CPU allocation on request).
 - **Database**: Google Cloud SQL (PostgreSQL 16) connected via **Cloud SQL Auth Proxy** / Unix Sockets with IAM Auth.
 - **Secrets**: Google Secret Manager with environment variable injection directly into container memory (Zero `.env` on disk).
