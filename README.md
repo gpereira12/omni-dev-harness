@@ -26,6 +26,14 @@ omni-dev-harness/
 │       ├── gcp-devops-infra/          <-- Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, IaC & Migrations
 │       └── data-security-rbac/        <-- Database per Service, Soft Delete, RBAC/CASL, LGPD
 │
+├── frameworks/                        <-- Suíte de Frameworks Metodológicos OMNI
+│   ├── OMNI-SAF.md                    <-- Software Architecture Framework (C4, DDD, PACELC, ADRs)
+│   ├── OMNI-DAF.md                    <-- Data Architecture Framework (Data Mesh, Contracts, CDC)
+│   ├── OMNI-POF.md                    <-- Product & UX Framework (Atomic Design, Discovery)
+│   ├── OMNI-REF.md                    <-- Reliability & Full Cycle Framework (Netflix & Google SRE)
+│   ├── OMNI-SEC.md                    <-- Security Framework (STRIDE Threat Modeling, Zero Trust)
+│   └── OMNI-AIF.md                    <-- Agentic AI Engineering Framework (Cognitive Loops, MCP, Evals)
+│
 ├── harness-template/                  <-- Template Clonável para QUALQUER Projeto (Padrão Acutis)
 │   ├── AGENTS.md.template             <-- Governança por projeto (Invariantes e DoD)
 │   ├── .harness/
