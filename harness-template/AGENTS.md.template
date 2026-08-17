@@ -1,0 +1,27 @@
+# {{PROJECT_NAME}} — Universal Agent Harness
+
+Este é o arquivo de governança central para agentes de IA (**Claude Code, Antigravity/Gemini, Codex, OpenCode, Cursor**).
+
+## 1. Topologia do Workspace & Servidores MCP
+
+- `src/`: Código fonte da aplicação.
+- `.planning/`: GSD (Decisões de Arquitetura, Roadmap, Estado em `STATE.md` e Specs em `docs/`).
+- `mcp_dev/`: Servidor MCP de desenvolvimento local, consulta a schemas e auditoria.
+- `.harness/`: Hooks determinísticos, skills sob demanda e subagentes.
+
+## 2. Invariantes Universais
+
+1. **Contexto é Orçamento**: Não carregue specs inteiras na conversa. Consulte arquivos sob demanda.
+2. **Decisões Travadas & GSD Vivo**: A fonte de verdade é `.planning/PROJECT.md`. Toda nova decisão estrutural DEVE ser registrada como tag `DEC-*` em `PROJECT.md`, e o `STATE.md` deve ser atualizado no fechamento do plano.
+3. **Tipagem e Qualidade**: Zero `any`. Mantenha baixa complexidade ciclomática, early returns, e siga princípios SOLID, Clean Architecture e as 18 Regras REST.
+4. **Automação Segura**: Comandos destrutivos de banco (`migrate reset`, `drop`, `compose down -v`) são bloqueados por guards em `.harness/hooks/`.
+5. **Regra de 2 Falhas**: Se um fix falhar 2 vezes seguidas na mesma sessão, pare, limpe o contexto e reavalie a premissa.
+6. **Isolamento de Sessões**: Para tarefas simultâneas/paralelas, utilize Git Worktrees (`.harness/skills/git-worktree-workflow/`).
+7. **Timestamps em UTC**: Todas as APIs e entidades de banco de dados usam ISO 8601 em UTC puro (`Z`).
+
+## 3. Verificação de Tarefas (Definition of Done)
+
+Antes de considerar uma tarefa pronta:
+1. **Sensor de Código**: Execute `.harness/hooks/pre-commit-check.sh` (build + lint + tests + .env validation).
+2. **Code Review Limpo**: Execute a revisão via subagente `.harness/agents/code-reviewer.md`.
+3. **Sincronização do GSD**: Atualize `.planning/STATE.md` com a atividade executada e novo status.
