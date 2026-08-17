@@ -42,7 +42,8 @@ omni-dev-harness/
 │   │   │   └── pre-commit-check.sh    <-- Sensor de código (Build + Lint + Tests + .env)
 │   │   ├── agents/
 │   │   │   ├── code-reviewer.md       <-- Subagente de revisão estrita
-│   │   │   └── architecture-advisor.md<-- Subagente de diagnóstico e stack
+│   │   │   ├── architecture-advisor.md<-- Subagente de diagnóstico e stack
+│   │   │   └── schema-reviewer.md     <-- Subagente de auditoria de schemas de banco
 │   │   └── skills/
 │   │       ├── git-worktree-workflow/ <-- Isolamento de sessões paralelas
 │   │       └── gsd-architecture-guide/<-- Gestão de estado em .planning/
@@ -62,16 +63,86 @@ omni-dev-harness/
 
 ---
 
-## ⚡ Instalação Rápida em Qualquer Projeto
+## ⚡ Como Rodar e Equipar Seus Projetos
 
-Para equipar um projeto novo ou existente com o harness e as regras completas, execute no diretório do projeto:
+Você pode utilizar o `omni-dev-harness` de **três formas práticas**:
+
+### Opção 1: Inicialização em 1 Linha (Local)
+Para equipar qualquer projeto existente na sua máquina com o harness e servidor MCP:
 
 ```bash
-# Via script local:
-/caminho/para/omni-dev-harness/scripts/init-harness.sh
+# Navegue até o projeto alvo
+cd /Users/gabrielpereira/Desktop/Projetos/Nexus/meu-novo-projeto
 
-# Ou apontando para o seu repositório no GitHub:
-curl -sSL https://raw.githubusercontent.com/seu-usuario/omni-dev-harness/main/scripts/init-harness.sh | bash
+# Execute o script de inicialização do omni-dev-harness
+/Users/gabrielpereira/Desktop/Projetos/Nexus/omni-dev-harness/scripts/init-harness.sh
+```
+
+O script criará automaticamente:
+1. `AGENTS.md` customizado com o nome do projeto.
+2. `.harness/` com os hooks (`pre-commit-check.sh`, `guard-destructive-db.sh`), subagentes e skills.
+3. `.planning/STATE.md` com a estrutura inicial de GSD.
+4. `mcp_dev/` configurado e pronto para compilar.
+
+---
+
+### Opção 2: Via Git Submodule (Recomendado para Sincronização Contínua)
+Para manter as regras e frameworks sempre sincronizados com o repositório central:
+
+```bash
+cd meu-projeto
+git submodule add git@github.com:gpereira12/omni-dev-harness.git .omni-harness
+./.omni-harness/scripts/init-harness.sh
+```
+
+---
+
+### Opção 3: Como Rodar no Dia a Dia com Agentes de IA
+
+Uma vez instalado o harness no projeto, qualquer ferramenta de IA (**Antigravity, Claude Code, Cursor, Codex, OpenCode**) segue o fluxo operacional abaixo:
+
+#### 1. Início de Tarefa (Context Routing)
+O agente consulta o `AGENTS.md` e ativa sob demanda apenas a skill necessária via `.agent/rules/skill-router.md`.
+
+#### 2. Durante o Desenvolvimento (Proteção Ativa)
+Se o agente tentar executar comandos perigosos como `prisma migrate reset` ou `drop table`, o guardrail `.harness/hooks/guard-destructive-db.sh` bloqueia a execução imediatamente.
+
+#### 3. Auditoria de Banco de Dados (Schema Review)
+Ao criar ou alterar tabelas no Prisma/SQL:
+```bash
+# Invoque o subagente de auditoria de dados:
+# "Subagente schema-reviewer, audite o schema do Prisma procurando por God Tables ou falta de CHECKs"
+```
+
+#### 4. Fechamento da Tarefa (Definition of Done)
+Antes de considerar uma tarefa pronta, execute o sensor determinístico de qualidade:
+```bash
+./.harness/hooks/pre-commit-check.sh
+```
+O script valida automaticamente:
+* Conformidade do `.env` com o `.env.example`.
+* Execução do Linter (`npm run lint`).
+* Compilação TypeScript e Build (`npm run build`).
+* Execução da suíte de testes (`npm test`).
+
+#### 5. Execução do Servidor MCP de Desenvolvimento
+Para conectar o servidor MCP do projeto ao Antigravity/Claude Code/Cursor:
+```bash
+cd mcp_dev
+npm install
+npm run build
+npm start
+```
+E adicione ao seu arquivo `.mcp.json` na raiz do projeto:
+```json
+{
+  "mcpServers": {
+    "dev-tools": {
+      "command": "node",
+      "args": ["mcp_dev/dist/index.js"]
+    }
+  }
+}
 ```
 
 ---
