@@ -27,7 +27,7 @@ always_use: false
 - **OpenTofu / Terraform**: Declarative infrastructure in HCL with GCS remote state backend.
 - **Pulumi (TypeScript)**: Type-safe, programmatically defined GCP infrastructure using `@pulumi/gcp`.
 
-## 3. Zero-Downtime Database Migrations
+## 4. Zero-Downtime Database Migrations
 - **Rule 1**: NEVER execute migrations in application start command (`CMD ["npm", "start"]`). Execute as an isolated **Cloud Run Job** during CI/CD deploy.
 - **Rule 2 (Expand & Contract)**:
   - *Phase 1 (Expand)*: Add new column as nullable. Application writes to both.
@@ -35,3 +35,11 @@ always_use: false
   - *Phase 3 (Contract)*: Drop old column in subsequent release.
 - **Rule 3**: Create PostgreSQL indexes concurrently (`CREATE INDEX CONCURRENTLY`) to avoid table write locks.
 - **Rule 4**: Always set safety lock timeouts: `SET lock_timeout = '3s';`.
+
+---
+
+## 5. Cloud FinOps & Cost Governance
+- **Concurrency**: `concurrency = 80` nos containers do Cloud Run para dividir o custo de vCPU por 80.
+- **Scale-to-Zero**: `min-instances = 0` para ambientes de desenvolvimento, staging e workers de fila.
+- **Storage Lifecycle**: Transição automática no GCS: Standard (0-30d) ➔ Nearline (31-90d) ➔ Coldline (>90d).
+- **Billing Hard Caps**: Alertas automáticos no GCP Billing aos 50%, 80% e 100% do orçamento mensal.
