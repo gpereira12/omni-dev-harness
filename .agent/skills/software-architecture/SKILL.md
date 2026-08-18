@@ -38,3 +38,16 @@ always_use: false
 ## 8. Backend for Frontend (BFF) & API Gateway
 - **API Gateway**: Single entry point for routing, authentication, rate limiting, and CORS.
 - **BFF**: Tailored backend aggregation layer per client interface (Web vs Mobile vs Partner).
+
+---
+
+## 9. Backend Language Matrix
+
+| Language / Framework | Ideal Use Case | Architecture Standard |
+| :--- | :--- | :--- |
+| **C# (.NET 8 / 9+)** | Fintechs, banking, enterprise APIs, heavy concurrency & throughput. | [Clean Arch + CQRS (MediatR) + EF Core/Dapper + MassTransit](./dotnet-csharp-standards.md) |
+| **TypeScript (NestJS)** | Unified TS ecosystem, rapid domain iteration, BFFs. | Hexagonal Architecture + Prisma / Drizzle |
+| **Rust (Tokio / Axum)** | Ultra-low latency, real-time networking, zero-cost abstractions. | Hexagonal / Domain-driven with SQLx |
+| **Go (Gin / Fiber)** | Microservices, high concurrency cloud tools, lightweight APIs. | Standard Clean Arch / Go-Kit |
+| **Ruby on Rails** | Rapid MVPs, convention-over-configuration monoliths. | Rails MVC + Sidekiq Workers |
+
