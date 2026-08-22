@@ -5,19 +5,24 @@ Este é o arquivo de governança central para agentes de IA (**Claude Code, Anti
 ## 1. Topologia do Workspace & Servidores MCP
 
 - `src/`: Código fonte da aplicação.
-- `.planning/`: GSD (Decisões de Arquitetura, Roadmap, Estado em `STATE.md` e Specs em `docs/`).
-- `mcp_dev/`: Servidor MCP de desenvolvimento local, consulta a schemas e auditoria.
+- `.planning/`: GSD e SDD (Decisões em `decisions/`, Specs Técnicas em `specs/`, Estado em `STATE.md`, Backlog em `BACKLOG.md`).
+- `mcp_dev/`: Servidor MCP de desenvolvimento local, consulta indexada a decisões, schemas DDL e auditoria.
 - `.harness/`: Hooks determinísticos, skills sob demanda e subagentes.
 
 ## 2. Invariantes Universais
 
-1. **Contexto é Orçamento**: Não carregue specs inteiras na conversa. Consulte arquivos sob demanda.
-2. **Decisões Travadas & GSD Vivo**: A fonte de verdade é `.planning/PROJECT.md`. Toda nova decisão estrutural DEVE ser registrada como tag `DEC-*` em `PROJECT.md`, e o `STATE.md` deve ser atualizado no fechamento do plano.
-3. **Tipagem e Qualidade**: Zero `any`. Mantenha baixa complexidade ciclomática, early returns, e siga princípios SOLID, Clean Architecture e as 18 Regras REST.
-4. **Automação Segura**: Comandos destrutivos de banco (`migrate reset`, `drop`, `compose down -v`) são bloqueados por guards em `.harness/hooks/`.
-5. **Regra de 2 Falhas**: Se um fix falhar 2 vezes seguidas na mesma sessão, pare, limpe o contexto e reavalie a premissa.
-6. **Isolamento de Sessões**: Para tarefas simultâneas/paralelas, utilize Git Worktrees (`.harness/skills/git-worktree-workflow/`).
-7. **Timestamps em UTC**: Todas as APIs e entidades de banco de dados usam ISO 8601 em UTC puro (`Z`).
+1. **Contexto é Orçamento**: Não carregue specs inteiras na conversa. Consulte arquivos sob demanda ou via MCP indexador.
+2. **Decisões com Evidência & GSD Vivo**: A fonte de verdade é `.planning/`. Toda nova decisão estrutural DEVE ser registrada como um ADR em `.planning/decisions/` contendo evidências de código (`file://...`), no mínimo 2 alternativas e prós/contras antes da implementação.
+3. **Spec-First & Fronteira Rígida (No Scope Creep)**: Toda tarefa parte de uma Spec técnica em `.planning/specs/`. É **PROIBIDO** alterar arquivos fora da lista de "Arquivos Afetados" da Spec aprovada. Melhorias acessórias descobertas devem ser registradas em `.planning/BACKLOG.md`.
+4. **Regra de Capacidade de Subagentes (3x6)**:
+   - Tarefas $\le 6$: Execução exclusiva pelo agente principal.
+   - Tarefas de 7 a 18: Paralelismo balanceado em no máximo 3 subagentes (máx 6 tarefas por subagente).
+   - Tarefas $> 18$: Decomposição obrigatória em Épicos e Sprints sequenciais.
+5. **Tipagem e Qualidade Estrita**: Zero `any`. Mantenha baixa complexidade ciclomática ($M < 5$), early returns, e siga princípios SOLID, Clean Architecture e as 18 Regras REST.
+6. **Automação Segura**: Comandos destrutivos de banco (`migrate reset`, `drop`, `compose down -v`) são bloqueados por guards em `.harness/hooks/`.
+7. **Regra de 2 Falhas**: Se um fix falhar 2 vezes seguidas na mesma sessão, pare, limpe o contexto e reavalie a premissa.
+8. **Isolamento de Sessões**: Para tarefas paralelas que toquem no código, utilize Git Worktrees (`.harness/skills/git-worktree-workflow/`).
+9. **Timestamps em UTC**: Todas as APIs e entidades de banco de dados usam ISO 8601 em UTC puro (`Z`).
 
 ## 3. Verificação de Tarefas (Definition of Done)
 

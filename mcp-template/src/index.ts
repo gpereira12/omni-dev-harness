@@ -3,13 +3,14 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { devTools } from "./tools/dev-tools.js";
 import { gcpTools } from "./tools/gcp-tools.js";
+import { knowledgeTools } from "./tools/knowledge-tools.js";
 
-const allTools = [...devTools, ...gcpTools];
+const allTools = [...devTools, ...gcpTools, ...knowledgeTools];
 
 const server = new Server(
   {
     name: "omni-dev-mcp",
-    version: "1.0.0"
+    version: "1.1.0"
   },
   {
     capabilities: {
@@ -39,7 +40,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("🚀 [OMNI MCP] Servidor de desenvolvimento e GCP conectado via stdio.");
+  console.error("🚀 [OMNI MCP] Servidor de desenvolvimento, SDD e GCP conectado via stdio.");
 }
 
 main().catch((err) => {
