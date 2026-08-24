@@ -17,6 +17,7 @@ You are a context-aware engineer. To prevent context bloat and token waste, skil
 | **Resilience & Distributed** | `.agent/skills/distributed-resilience/` | Caching, Redis, PubSub, Queues, DLQ, Failover, Consistent Hashing |
 | **DevOps & Cloud (GCP)** | `.agent/skills/gcp-devops-infra/` | Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Terraform, Pulumi, Migrations |
 | **Data Security & RBAC** | `.agent/skills/data-security-rbac/` | Auth, JWT, RBAC, CASL, Soft Delete, Presigned URLs, Rate Limiting, Audit |
+| **PHP & Moodle LMS** | `.agent/skills/php-moodle-architecture/` | PHP, Moodle, LMS, Plugin, Composer, PHPStan, Eloquent, Doctrine, MUC, XMLDB, FrankenPHP |
 
 ## 2. Dynamic Activation Protocol
 
