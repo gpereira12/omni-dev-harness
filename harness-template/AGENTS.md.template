@@ -1,32 +1,55 @@
-# {{PROJECT_NAME}} — Universal Agent Harness
+# {{PROJECT_NAME}} — Universal Agent Harness & SDD Governance
 
-Este é o arquivo de governança central para agentes de IA (**Claude Code, Antigravity/Gemini, Codex, OpenCode, Cursor**).
+> **Ambiente de Execução:** Este arquivo de governança foi projetado para execução nativa dentro de assistentes de agentes de IA (**Google Antigravity, Claude Code, OpenAI Codex, OpenCode, Cursor**).
+
+---
 
 ## 1. Topologia do Workspace & Servidores MCP
 
-- `src/`: Código fonte da aplicação.
-- `.planning/`: GSD e SDD (Decisões em `decisions/`, Specs Técnicas em `specs/`, Estado em `STATE.md`, Backlog em `BACKLOG.md`).
-- `mcp_dev/`: Servidor MCP de desenvolvimento local, consulta indexada a decisões, schemas DDL e auditoria.
+- `src/`: Código-fonte da aplicação.
+- `knowledge/`: Base de conhecimento permanente de engenharia, arquitetura e lições aprendidas (`lessons-learned/`).
+- `.planning/`: Motor SDD de execução ativa (Decisões em `decisions/`, Épicos em `epics/`, Specs Técnicas em `specs/`, Estado em `STATE.md`, Backlog em `BACKLOG.md`).
+- `mcp_dev/`: Servidor MCP opcional de desenvolvimento local (consulta indexada a memória SQLite FTS5, schemas DDL e observabilidade).
 - `.harness/`: Hooks determinísticos, skills sob demanda e subagentes.
+
+---
 
 ## 2. Invariantes Universais
 
-1. **Contexto é Orçamento**: Não carregue specs inteiras na conversa. Consulte arquivos sob demanda ou via MCP indexador.
-2. **Decisões com Evidência & GSD Vivo**: A fonte de verdade é `.planning/`. Toda nova decisão estrutural DEVE ser registrada como um ADR em `.planning/decisions/` contendo evidências de código (`file://...`), no mínimo 2 alternativas e prós/contras antes da implementação.
-3. **Spec-First & Fronteira Rígida (No Scope Creep)**: Toda tarefa parte de uma Spec técnica em `.planning/specs/`. É **PROIBIDO** alterar arquivos fora da lista de "Arquivos Afetados" da Spec aprovada. Melhorias acessórias descobertas devem ser registradas em `.planning/BACKLOG.md`.
-4. **Regra de Capacidade de Subagentes (3x6)**:
+0. **Memória Primeiro (Consulta Adaptável)**:
+   - *Se o projeto possuir MCP de Memória (`mcp_dev`)*: A IA DEVE executar `memory_query` ou `memory_briefing` antes de iniciar investigações de bugs ou refatorações complexas.
+   - *Se o projeto NÃO possuir MCP*: Consulte a base de conhecimento permanente em `knowledge/lessons-learned/` e os ADRs em `.planning/decisions/`.
+1. **Contexto é Orçamento (Zero Bloat)**:
+   - Não carregue arquivos completos às cegas na conversa. Use assinaturas de tipos (`.d.ts`), mapas de rotas e grafos de dependência para navegação cirúrgica.
+2. **Design System & UI Catalog-First (Projetos Frontend)**:
+   - Se o projeto possuir uma biblioteca/catálogo de componentes interno (ex: `@/core/ui`, `components/ui`) ou tema dinâmico, é **PROIBIDO** instanciar componentes crus de terceiros ou cores hexadecimais fixas. Utilize SEMPRE os componentes internos e as variáveis/tokens do tema.
+3. **Decisões com Evidência & GSD Vivo**:
+   - Toda nova decisão estrutural DEVE ser registrada como um ADR em `.planning/decisions/` contendo evidências empíricas de código (`file://...:line`), no mínimo 2 alternativas avaliadas e prós/contras antes da codificação.
+4. **Spec-First & Fronteira Rígida (Anti-Scope Creep)**:
+   - Toda tarefa parte de uma Spec técnica em `.planning/specs/`. É **PROIBIDO** alterar arquivos fora da lista de "Arquivos Afetados" da Spec aprovada. Débitos e melhorias acessórias devem ser registrados em `.planning/BACKLOG.md`.
+5. **Regra de Capacidade de Subagentes (3x6)**:
    - Tarefas $\le 6$: Execução exclusiva pelo agente principal.
    - Tarefas de 7 a 18: Paralelismo balanceado em no máximo 3 subagentes (máx 6 tarefas por subagente).
    - Tarefas $> 18$: Decomposição obrigatória em Épicos e Sprints sequenciais.
-5. **Tipagem e Qualidade Estrita**: Zero `any`. Mantenha baixa complexidade ciclomática ($M < 5$), early returns, e siga princípios SOLID, Clean Architecture e as 18 Regras REST.
-6. **Automação Segura**: Comandos destrutivos de banco (`migrate reset`, `drop`, `compose down -v`) são bloqueados por guards em `.harness/hooks/`.
-7. **Regra de 2 Falhas**: Se um fix falhar 2 vezes seguidas na mesma sessão, pare, limpe o contexto e reavalie a premissa.
-8. **Isolamento de Sessões**: Para tarefas paralelas que toquem no código, utilize Git Worktrees (`.harness/skills/git-worktree-workflow/`).
-9. **Timestamps em UTC**: Todas as APIs e entidades de banco de dados usam ISO 8601 em UTC puro (`Z`).
+6. **Clean Architecture & Tipagem Estrita**:
+   - Zero `any`. Mantenha baixa complexidade ciclomática ($M < 5$), early returns, isolamento estrito de camadas e respeito às 18 Regras REST e timestamps em UTC ISO 8601 (`Z`).
+7. **Git Worktree & Commits em Blocos Atômicos (Chunked Commits)**:
+   - **Worktrees com Aprovação:** Para tarefas paralelas que toquem no código, proponha a criação de um Git Worktree isolado.
+   - **Commits em Blocos:** É PROIBIDO fazer um único commit monolítico gigante. Agrupe as alterações em blocos lógicos estruturados:
+     1. *Bloco 1:* Contratos, DTOs e Schemas (`feat(types): ...`)
+     2. *Bloco 2:* Services, Hooks e Lógica de Negócio (`feat(services): ...`)
+     3. *Bloco 3:* Componentes de UI e Telas (`feat(ui): ...`)
+     4. *Bloco 4:* Testes e Documentação (`test: ...` / `docs: ...`)
+   - **Abertura de PR:** Finalize gerando o Pull Request com resumo executivo em blocos.
+8. **Portão de Deploy com Aprovação Humana (HITL)**:
+   - A IA é **ESTRITAMENTE PROIBIDA** de executar comandos de deploy em produção de forma autônoma. O ciclo da IA encerra na validação local do pipeline e entrega do relatório de release para validação e promoção pelo humano.
+
+---
 
 ## 3. Verificação de Tarefas (Definition of Done)
 
 Antes de considerar uma tarefa pronta:
-1. **Sensor de Código**: Execute `.harness/hooks/pre-commit-check.sh` (build + lint + tests + .env validation).
-2. **Code Review Limpo**: Execute a revisão via subagente `.harness/agents/code-reviewer.md`.
-3. **Sincronização do GSD**: Atualize `.planning/STATE.md` com a atividade executada e novo status.
+1. **Sensor de Código Determinístico**: Execute o validador local (`.harness/hooks/pre-commit-check.sh` ou `npm run check:all`).
+2. **Auto-Registro de Memória**: Ao solucionar bugs complexos ou estabelecer novos padrões, registre o aprendizado no MCP (`memory_write_page`) ou em `knowledge/lessons-learned/`.
+3. **Sincronização do GSD**: Atualize `.planning/STATE.md` com a atividade concluída e novo status.
+4. **Entrega em Blocos**: Proponha os commits atômicos em blocos e a abertura do PR.
