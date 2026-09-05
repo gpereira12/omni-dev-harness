@@ -141,5 +141,32 @@ Para equipar qualquer projeto existente na sua máquina com governança, SDD e s
 O script provisionará automaticamente:
 1. `AGENTS.md` customizado com as invariantes universais ativas.
 2. `.planning/` com subpastas `epics/`, `decisions/`, `specs/`, `templates/` e `BACKLOG.md`.
-3. `.harness/` com os hooks (`pre-commit-check.sh`, `guard-destructive-db.sh`), subagentes e skills.
+3. `.harness/` com os hooks (`pre-commit-check.sh`, `guard-destructive-db.sh`, `hardening-sensor.sh`), subagentes, packs (`two-pack`, `four-pack`, `six-pack`) e esteira de handoffs.
 4. `mcp_dev/` configurado com ferramentas de desenvolvimento e consulta rápida de conhecimento.
+
+---
+
+## 🌐 Omni-Forge: Mission Control & Swarm Esteiras
+
+O `omni-forge` é a **Torre de Controle Visual (Dashboard)** e CLI para orquestrar múltiplos agentes em esteiras industriais de código (Two-Pack, Four-Pack e Six-Pack) com portões de aprovação humana (*Attention Gates*).
+
+```bash
+# 1. Iniciar o Mission Control Dashboard em http://localhost:4200
+./omni-forge
+
+# 2. Registrar um projeto no Forge
+./omni-forge add /caminho/do/projeto --name "Meu App" --pack four-pack
+
+# 3. Listar projetos monitorados
+./omni-forge list
+
+# 4. Remover um projeto do Forge
+./omni-forge remove meu-app
+```
+
+### Funcionalidades do Dashboard:
+- **Portão de ATTENTION**: Interrompe a esteira e solicita aprovação/rejeição humana antes de avançar fases críticas.
+- **Kanban da Linha de Montagem**: Exibe cards se movendo entre `SPECIFIER` (TDD Red) $\rightarrow$ `CODER` (TDD Green) $\rightarrow$ `REFACTORER` ($M < 5$) $\rightarrow$ `GUARDIAN` (Multi-tenant/Lint) $\rightarrow$ `DONE`.
+- **Work Queue & Telemetria**: Monitoramento em tempo real do tempo de execução e saúde de cada agente.
+- **Lieutenant Chat**: Canal conversacional de alto nível para envio de ordens.
+
