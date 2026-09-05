@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# 🚀 Omni-Forge Mission Control Launcher & CLI
+# Gerencia e inicializa o painel visual e a esteira de agentes autônomos.
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DASHBOARD_DIR="$DIR/dashboard"
+PROJECTS_CONFIG="$DIR/.omni-projects.json"
+PORT="${PORT:-4200}"
+
+usage() {
+  cat <<EOF
+Uso: omni-forge [comando] [opções]
+
+Comandos:
+  (sem comando)             Inicia o Dashboard Mission Control em http://localhost:$PORT
+  add <caminho> [opções]    Registra um novo projeto no Forge
+                            --name <nome>   (Nome de exibição, opcional)
+                            --pack <pack>   (two-pack | four-pack | six-pack, default: four-pack)
+  list                      Lista os projetos registrados no Forge
+  remove <id>               Remove um projeto do Forge
+EOF
+  exit 1
+}
+
+CMD="${1:-start}"
+
+case "$CMD" in
+  start|"")
+    echo "═══════════════════════════════════════════════════════════"
+    echo "  🌐 OMNI-FORGE • MULTI-AGENT MISSION CONTROL & KANBAN"
+    echo "═══════════════════════════════════════════════════════════"
+    echo ""
+    echo "⚡ Iniciando servidor do Dashboard na porta $PORT..."
+
+    # Abre no navegador após 1 segundo
+    (sleep 1 && open "http://localhost:$PORT" 2>/dev/null || true) &
+
+    # Executa o servidor Node nativo
+    exec node "$DASHBOARD_DIR/server.js"
+    ;;
+
+  add)
+    shift
+    TARGET_PATH="${1:-}"
+    [ -z "$TARGET_PATH" ] && usage
+    shift
+
+    RESOLVED_PATH="$(cd "$TARGET_PATH" 2>/dev/null && pwd || echo "$TARGET_PATH")"
+    if [ ! -d "$RESOLVED_PATH" ]; then
+      echo "Erro: Diretório '$TARGET_PATH' não encontrado."
+      exit 1
+    fi
+
+    NAME="$(basename "$RESOLVED_PATH")"
+    PACK="four-pack"
+
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --name) NAME="$2"; shift 2 ;;
+        --pack) PACK="$2"; shift 2 ;;
+        *) echo "Opção desconhecida: $1"; exit 1 ;;
+      esac
+    done
+
+    ID="$(echo "$NAME" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-$//')"
+
+    # Inicializa arquivo se não existir
+    if [ ! -f "$PROJECTS_CONFIG" ]; then
+      echo "[]" > "$PROJECTS_CONFIG"
+    fi
+
+    # Garante estrutura do .harness no projeto
+    mkdir -p "$RESOLVED_PATH/.harness/handoffs/queue" "$RESOLVED_PATH/.harness/handoffs/attention" "$RESOLVED_PATH/.harness/handoffs/archive"
+
+    # Atualiza JSON via Node
+    node -e "
+      const fs = require('fs');
+      const projects = JSON.parse(fs.readFileSync('$PROJECTS_CONFIG', 'utf8'));
+      const filtered = projects.filter(p => p.id !== '$ID' && p.path !== '$RESOLVED_PATH');
+      filtered.push({
+        id: '$ID',
+        name: '$NAME',
+        path: '$RESOLVED_PATH',
+        pack: '$PACK',
+        addedAt: new Date().toISOString()
+      });
+      fs.writeFileSync('$PROJECTS_CONFIG', JSON.stringify(filtered, null, 2));
+      console.log('✅ Projeto \'$NAME\' registrado no Forge com topologia \'$PACK\'!');
+    "
+    ;;
+
+  list)
+    if [ ! -f "$PROJECTS_CONFIG" ] || [ "$(cat "$PROJECTS_CONFIG")" = "[]" ]; then
+      echo "Nenhum projeto registrado no Forge. Use 'omni-forge add <caminho>' ou adicione pelo Dashboard."
+      exit 0
+    fi
+    node -e "
+      const fs = require('fs');
+      const projects = JSON.parse(fs.readFileSync('$PROJECTS_CONFIG', 'utf8'));
+      console.log('=== PROJETOS REGISTRADOS NO OMNI-FORGE ===');
+      projects.forEach((p, idx) => {
+        console.log(\`\${idx + 1}. \${p.name} [\${p.pack}] -> \${p.path}\`);
+      });
+    "
+    ;;
+
+  remove)
+    shift
+    PROJECT_ID="${1:-}"
+    [ -z "$PROJECT_ID" ] && { echo "Erro: informe o ID do projeto."; exit 1; }
+
+    if [ -f "$PROJECTS_CONFIG" ]; then
+      node -e "
+        const fs = require('fs');
+        const projects = JSON.parse(fs.readFileSync('$PROJECTS_CONFIG', 'utf8'));
+        const filtered = projects.filter(p => p.id !== '$PROJECT_ID');
+        fs.writeFileSync('$PROJECTS_CONFIG', JSON.stringify(filtered, null, 2));
+        console.log('🗑️ Projeto \'$PROJECT_ID\' removido do Forge.');
+      "
+    fi
+    ;;
+
+  *)
+    usage
+    ;;
+esac
