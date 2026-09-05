@@ -1,0 +1,54 @@
+{
+  "name": "six-pack",
+  "description": "Topologia para módulos de alta criticidade (pagamentos, auth, concorrência, migrações de risco). Inclui testes de mutação e QA E2E.",
+  "roles": [
+    {
+      "id": "specifier",
+      "name": "Specifier",
+      "worktree": ".worktrees/specifier",
+      "prompt": ".harness/agents/specifier.md",
+      "require_approval": true,
+      "next_role": "coder"
+    },
+    {
+      "id": "coder",
+      "name": "Coder",
+      "worktree": ".worktrees/coder",
+      "prompt": ".harness/agents/coder.md",
+      "require_approval": false,
+      "next_role": "cleaner"
+    },
+    {
+      "id": "cleaner",
+      "name": "Cleaner",
+      "worktree": ".worktrees/cleaner",
+      "prompt": ".harness/agents/refactorer.md",
+      "require_approval": false,
+      "next_role": "architect"
+    },
+    {
+      "id": "architect",
+      "name": "Architect",
+      "worktree": ".worktrees/architect",
+      "prompt": ".harness/agents/guardian.md",
+      "require_approval": true,
+      "next_role": "hardening"
+    },
+    {
+      "id": "hardening",
+      "name": "Hardening",
+      "worktree": ".worktrees/hardening",
+      "prompt": ".harness/agents/hardening.md",
+      "require_approval": false,
+      "next_role": "qa"
+    },
+    {
+      "id": "qa",
+      "name": "QA",
+      "worktree": ".worktrees/qa",
+      "prompt": ".harness/agents/qa.md",
+      "require_approval": true,
+      "next_role": null
+    }
+  ]
+}

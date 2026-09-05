@@ -1,0 +1,22 @@
+{
+  "name": "two-pack",
+  "description": "Topologia enxuta para bugfixes rápidos, spikes, scripts e tarefas de estilização cosmética.",
+  "roles": [
+    {
+      "id": "coder",
+      "name": "Coder",
+      "worktree": ".worktrees/coder",
+      "prompt": ".harness/agents/coder.md",
+      "require_approval": false,
+      "next_role": "cleaner"
+    },
+    {
+      "id": "cleaner",
+      "name": "Cleaner",
+      "worktree": ".worktrees/cleaner",
+      "prompt": ".harness/agents/refactorer.md",
+      "require_approval": true,
+      "next_role": null
+    }
+  ]
+}

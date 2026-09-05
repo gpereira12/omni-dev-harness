@@ -1,0 +1,38 @@
+{
+  "name": "four-pack",
+  "description": "Topologia padrão do OMNI (80% das tarefas). Separação estrita de TDD Red, TDD Green, Refatoração e Governança.",
+  "roles": [
+    {
+      "id": "specifier",
+      "name": "Specifier",
+      "worktree": ".worktrees/specifier",
+      "prompt": ".harness/agents/specifier.md",
+      "require_approval": true,
+      "next_role": "coder"
+    },
+    {
+      "id": "coder",
+      "name": "Coder",
+      "worktree": ".worktrees/coder",
+      "prompt": ".harness/agents/coder.md",
+      "require_approval": false,
+      "next_role": "refactorer"
+    },
+    {
+      "id": "refactorer",
+      "name": "Refactorer",
+      "worktree": ".worktrees/refactorer",
+      "prompt": ".harness/agents/refactorer.md",
+      "require_approval": false,
+      "next_role": "guardian"
+    },
+    {
+      "id": "guardian",
+      "name": "Guardian",
+      "worktree": ".worktrees/guardian",
+      "prompt": ".harness/agents/guardian.md",
+      "require_approval": true,
+      "next_role": null
+    }
+  ]
+}
