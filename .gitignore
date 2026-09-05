@@ -1,0 +1,15 @@
+# Configurações locais de projetos do usuário
+.omni-projects.json
+projects.json
+
+# Sistema e logs
+.DS_Store
+*.log
+npm-debug.log*
+
+# Node
+node_modules/
+dist/
+
+# Worktrees locais
+.worktrees/

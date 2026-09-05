@@ -8,11 +8,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "⚡ [OMNI HARNESS] Inicializando governança e SDD em: $TARGET_DIR (Projeto: $PROJECT_NAME)..."
 
-# 1. Copia a pasta .harness (hooks determinísticos e subagentes)
-echo "📁 [1/5] Instalando hooks determinísticos, subagentes e skills..."
+# 1. Copia a pasta .harness (hooks determinísticos, subagentes, packs e handoffs)
+echo "📁 [1/5] Instalando hooks determinísticos, subagentes, packs e esteira de handoffs..."
 mkdir -p "$TARGET_DIR/.harness"
 cp -R "$SCRIPT_DIR/harness-template/.harness/"* "$TARGET_DIR/.harness/"
-chmod +x "$TARGET_DIR/.harness/hooks/"*.sh
+mkdir -p "$TARGET_DIR/.harness/handoffs/queue" "$TARGET_DIR/.harness/handoffs/attention" "$TARGET_DIR/.harness/handoffs/archive"
+chmod +x "$TARGET_DIR/.harness/hooks/"*.sh 2>/dev/null || true
+chmod +x "$TARGET_DIR/.harness/handoffs/"*.sh 2>/dev/null || true
+
 
 # 2. Cria AGENTS.md se não existir
 if [ ! -f "$TARGET_DIR/AGENTS.md" ]; then
