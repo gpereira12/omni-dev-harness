@@ -13,6 +13,8 @@ always_use: false
 | **Next.js (App Router)** | Hybrid SSR/RSC, portals with critical SEO, combined auth. | Pure internal authenticated dashboards where SPA latency is better. |
 | **Vite (React / Vue)** | 100% Authenticated SaaS, Dashboards, internal tools (SPA). | Public sites requiring crawler indexability without client JS. |
 | **Astro** | Content-first sites, documentation, landing pages (Islands Arch). | Highly dynamic authenticated SaaS dashboards. |
+| **PWA (Vite / Next)** | B2B SaaS, portais operacionais de campo, instalação rápida sem loja. | Apps que exigem presença em loja ou background tracking contínuo. |
+| **Capacitor (Web Shell)** | Publicação em App Store/Google Play aproveitando 100% da base Web, Push Nativo, BLE. | Apps B2C com animações gestuais extremas a 120 FPS ou gráficos 3D pesados. |
 | **Templates (Nunjucks/Liquid)**| Traditional server-side rendering, transactional emails, themes. | Rich client-side reactive applications. |
 | **React Native (Expo)** | Cross-platform mobile (iOS + Android), OTA updates via EAS. | Heavy 3D/GPU rendering or specialized hardware apps. |
 | **Kotlin (Compose)** | Native Android, POS hardware terminals, deep OS integration. | Cross-platform with single small team. |
@@ -72,4 +74,4 @@ always_use: false
 - **4-State Async Pattern**: Todo consumo assíncrono deve implementar: `Idle` | `Loading (Skeleton)` | `Success` | `Error (com CTA de Retry)`.
 - **Global Toast Bus**: Sistema desacoplado de notificações (Sonner) acionado via event-driven hooks.
 - **Real-Time Streaming**: Use Server-Sent Events (SSE) para streaming de respostas de IA e atualizações em tempo real sobre HTTP/2.
-- **Mobile Offline-First**: Persistência local via SQLite (WatermelonDB) ou TanStack Query Persistence com sync assíncrono.
+- **Mobile Offline-First**: Persistência local via SQLite (WatermelonDB/Capacitor) ou TanStack Query Persistence com sync assíncrono. Veja detalhes em [.agent/skills/pwa-mobile-architecture/SKILL.md](file:///Users/gabrielpereira/Desktop/Projetos/Nexus/omni-dev-harness/.agent/skills/pwa-mobile-architecture/SKILL.md).

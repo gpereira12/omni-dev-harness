@@ -21,10 +21,11 @@ omni-dev-harness/
 │       ├── master-protocol/           <-- O MIP (Fluxo de Discovery em 7 Fases)
 │       ├── software-architecture/     <-- Hexagonal, Outbox, Saga, CQRS, ACL, Sidecar, Bulkhead
 │       ├── frontend-design-system/    <-- Next, Vite, Astro, Mobile (Expo/Native), Shadcn, 21st.dev
+│       ├── pwa-mobile-architecture/   <-- PWA, Capacitor, Service Workers, Cache Storage & Mobile UX
 │       ├── ux-behavioral-psychology/  <-- Leis de UX (Hick, Fitts, Doherty), Carga Cognitiva & Apple Standards
 │       ├── distributed-resilience/    <-- Cache-Aside, Consistent Hashing, DLQ, Failover, SKIP LOCKED
 │       ├── gcp-devops-infra/          <-- Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, IaC & Migrations
-│       └── data-security-rbac/        <-- Database per Service, Soft Delete, RBAC/CASL, LGPD
+│       └── data-security-rbac/        <-- AuthN (GCIP, Passkeys), AuthZ (Concordia, RBAC/ABAC/ReBAC), LGPD
 │
 ├── frameworks/                        <-- Suíte de Frameworks Metodológicos OMNI
 │   ├── OMNI-SAF.md                    <-- Software Architecture Framework (C4, DDD, PACELC, ADRs)
@@ -167,6 +168,6 @@ O `omni-forge` é a **Torre de Controle Visual (Dashboard)** e CLI para orquestr
 ### Funcionalidades do Dashboard:
 - **Portão de ATTENTION**: Interrompe a esteira e solicita aprovação/rejeição humana antes de avançar fases críticas.
 - **Kanban da Linha de Montagem**: Exibe cards se movendo entre `SPECIFIER` (TDD Red) $\rightarrow$ `CODER` (TDD Green) $\rightarrow$ `REFACTORER` ($M < 5$) $\rightarrow$ `GUARDIAN` (Multi-tenant/Lint) $\rightarrow$ `DONE`.
-- **Work Queue & Telemetria**: Monitoramento em tempo real do tempo de execução e saúde de cada agente.
-- **Lieutenant Chat**: Canal conversacional de alto nível para envio de ordens.
+- **Work Queue & Telemetria**: Monitoramento em tempo real da esteira ativa, Git Worktrees e integridade do portão de atenção.
+- **Raio-X Técnico dos Cards**: Inspeção profunda de manifests JSON, worktrees físicos, hashes de commit e avanço de fase, operando em perfeita simbiose com o Antigravity IDE como arquiteto estratégico.
 
