@@ -1,240 +1,1309 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Omni-Forge • Mission Control</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            sand: {
-              50: '#FBFBFA',
-              100: '#F7F6F3',
-              200: '#EFECE6',
-              300: '#E2DED5',
-              800: '#2E2D2B',
-              900: '#1C1B1A'
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Omni-Forge • Mission Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              sand: {
+                50: "#FBFBFA",
+                100: "#F7F6F3",
+                200: "#EFECE6",
+                300: "#E2DED5",
+                800: "#2E2D2B",
+                900: "#1C1B1A",
+              },
+              omni: {
+                accent: "#0066FF",
+                green: "#10B981",
+                amber: "#F59E0B",
+                red: "#EF4444",
+              },
             },
-            omni: {
-              accent: '#0066FF',
-              green: '#10B981',
-              amber: '#F59E0B',
-              red: '#EF4444'
-            }
-          }
-        }
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
       }
-    }
-  </script>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    .card-shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
-  </style>
-</head>
-<body class="bg-[#F2EFE9] text-sand-900 min-h-screen flex flex-col antialiased selection:bg-omni-accent selection:text-white">
+      .card-shadow {
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.06),
+          0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-[#F2EFE9] text-sand-900 min-h-screen flex flex-col antialiased selection:bg-omni-accent selection:text-white"
+  >
+    <!-- HEADER -->
+    <header
+      class="bg-[#EAE6DF] border-b border-sand-300 px-6 py-3 flex items-center justify-between sticky top-0 z-30"
+    >
+      <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2">
+          <span
+            class="font-bold text-lg tracking-tight flex items-center space-x-1.5"
+          >
+            <span
+              class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"
+            ></span>
+            <span>Omni-Forge</span>
+          </span>
+          <span
+            class="text-xs bg-sand-300/70 text-sand-800 px-2 py-0.5 rounded font-mono font-medium"
+            >live • Antigravity Engine</span
+          >
+        </div>
+      </div>
 
-  <!-- HEADER -->
-  <header class="bg-[#EAE6DF] border-b border-sand-300 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
-    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2.5">
+        <!-- VIEW MODE TOGGLE -->
+        <div
+          class="flex items-center bg-sand-200 rounded p-0.5 border border-sand-300 text-xs"
+        >
+          <button
+            id="btn-view-projects"
+            onclick="setViewMode('projects')"
+            class="px-2.5 py-1 rounded font-bold bg-white text-sand-900 shadow-sm transition-all flex items-center space-x-1"
+          >
+            <span>📁</span>
+            <span>Por Projeto</span>
+          </button>
+          <button
+            id="btn-view-epics"
+            onclick="setViewMode('epics')"
+            class="px-2.5 py-1 rounded font-medium text-sand-600 hover:text-sand-900 transition-all flex items-center space-x-1"
+          >
+            <span>🧩</span>
+            <span>Por Feature / Épico</span>
+          </button>
+        </div>
+
+        <button
+          onclick="openManageProjectsModal()"
+          class="bg-sand-100 hover:bg-white text-sand-800 border border-sand-300 text-xs font-medium px-3 py-1.5 rounded transition-colors flex items-center space-x-1"
+        >
+          <span>⚙️ Gerenciar</span>
+        </button>
+        <button
+          onclick="openAddProjectModal()"
+          class="bg-sand-100 hover:bg-white text-sand-800 border border-sand-300 text-xs font-medium px-3 py-1.5 rounded transition-colors flex items-center space-x-1"
+        >
+          <span>+ Projeto</span>
+        </button>
+        <button
+          onclick="openNewTaskModal()"
+          class="bg-[#2B3530] hover:bg-[#1E2522] text-white text-xs font-semibold px-3 py-1.5 rounded shadow transition-colors flex items-center space-x-1.5"
+        >
+          <span>+ Nova Tarefa</span>
+        </button>
+        <button
+          onclick="refreshData()"
+          title="Recarregar dados"
+          class="bg-sand-100 hover:bg-white text-sand-800 border border-sand-300 text-xs font-medium px-2.5 py-1.5 rounded transition-colors"
+        >
+          ↻
+        </button>
+      </div>
+    </header>
+
+    <!-- ATTENTION BANNER (PORTÃO DE APROVAÇÃO HUMANA) -->
+    <div
+      id="attention-container"
+      class="hidden bg-[#FEF6E9] border-b border-[#F5D8A4] px-6 py-2.5 flex items-center justify-between text-xs transition-all duration-200"
+    >
+      <div class="flex items-center space-x-3">
+        <span
+          class="bg-[#F59E0B] text-white font-bold px-2 py-0.5 rounded tracking-wider uppercase text-[10px]"
+          >ATTENTION</span
+        >
+        <span id="attention-text" class="font-medium text-amber-950"></span>
+      </div>
       <div class="flex items-center space-x-2">
-        <span class="font-bold text-lg tracking-tight flex items-center space-x-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Omni-Forge</span>
+        <button
+          id="btn-view-doc"
+          onclick="viewAttentionDoc()"
+          class="bg-white hover:bg-sand-50 text-sand-800 border border-sand-300 px-2.5 py-1 rounded font-medium shadow-sm transition-colors"
+        >
+          Ver Detalhes
+        </button>
+        <button
+          id="btn-approve"
+          onclick="approveAttentionTask()"
+          class="bg-[#1F493D] hover:bg-[#16362D] text-white px-3 py-1 rounded font-medium shadow-sm transition-colors"
+        >
+          Approve
+        </button>
+        <button
+          id="btn-reject"
+          onclick="rejectAttentionTask()"
+          class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-3 py-1 rounded font-medium shadow-sm transition-colors"
+        >
+          Reject
+        </button>
+      </div>
+    </div>
+
+    <!-- PREVIEW SANDBOX CONTROL BAR -->
+    <div
+      id="preview-control-bar"
+      class="bg-[#1C1B1A] text-white px-6 py-2 flex items-center justify-between text-xs border-b border-sand-800 transition-all"
+    >
+      <div class="flex items-center space-x-4">
+        <span
+          class="font-mono uppercase text-[10px] tracking-wider text-emerald-400 font-bold flex items-center space-x-1.5"
+        >
+          <span
+            id="preview-main-indicator"
+            class="w-2 h-2 rounded-full bg-sand-500"
+          ></span>
+          <span>SANDBOXED PREVIEW TRIO</span>
         </span>
-        <span class="text-xs bg-sand-300/70 text-sand-800 px-2 py-0.5 rounded font-mono font-medium">live • Lieutenant Active</span>
-      </div>
-    </div>
-
-    <div class="flex items-center space-x-2.5">
-      <button onclick="openManageProjectsModal()" class="bg-sand-100 hover:bg-white text-sand-800 border border-sand-300 text-xs font-medium px-3 py-1.5 rounded transition-colors flex items-center space-x-1">
-        <span>📁 Projetos</span>
-      </button>
-      <button onclick="openAddProjectModal()" class="bg-sand-100 hover:bg-white text-sand-800 border border-sand-300 text-xs font-medium px-3 py-1.5 rounded transition-colors flex items-center space-x-1">
-        <span>+ Adicionar Projeto</span>
-      </button>
-      <button onclick="openNewTaskModal()" class="bg-[#2B3530] hover:bg-[#1E2522] text-white text-xs font-semibold px-3 py-1.5 rounded shadow transition-colors flex items-center space-x-1.5">
-        <span>+ Nova Tarefa</span>
-      </button>
-      <button onclick="refreshData()" title="Recarregar dados" class="bg-sand-100 hover:bg-white text-sand-800 border border-sand-300 text-xs font-medium px-2.5 py-1.5 rounded transition-colors">
-        ↻
-      </button>
-    </div>
-  </header>
-
-  <!-- ATTENTION BANNER (PORTÃO DE APROVAÇÃO HUMANA) -->
-  <div id="attention-container" class="hidden bg-[#FEF6E9] border-b border-[#F5D8A4] px-6 py-2.5 flex items-center justify-between text-xs transition-all duration-200">
-    <div class="flex items-center space-x-3">
-      <span class="bg-[#F59E0B] text-white font-bold px-2 py-0.5 rounded tracking-wider uppercase text-[10px]">ATTENTION</span>
-      <span id="attention-text" class="font-medium text-amber-950"></span>
-    </div>
-    <div class="flex items-center space-x-2">
-      <button id="btn-view-doc" onclick="viewAttentionDoc()" class="bg-white hover:bg-sand-50 text-sand-800 border border-sand-300 px-2.5 py-1 rounded font-medium shadow-sm transition-colors">
-        Ver Detalhes
-      </button>
-      <button id="btn-approve" onclick="approveAttentionTask()" class="bg-[#1F493D] hover:bg-[#16362D] text-white px-3 py-1 rounded font-medium shadow-sm transition-colors">
-        Approve
-      </button>
-      <button id="btn-reject" onclick="rejectAttentionTask()" class="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-3 py-1 rounded font-medium shadow-sm transition-colors">
-        Reject
-      </button>
-    </div>
-  </div>
-
-  <!-- MAIN BODY: KANBAN BOARDS (ESQUERDA) + WORK QUEUE & LIEUTENANT (DIREITA) -->
-  <main class="flex-1 flex overflow-hidden">
-    
-    <!-- ÁREA DOS PROJETOS E KANBAN -->
-    <section class="flex-1 overflow-y-auto p-6 space-y-6">
-      <div id="projects-container" class="space-y-6">
-        <!-- Renderizado dinamicamente pelo app.js -->
-        <div class="text-center py-12 text-sand-400">Carregando esteiras do Omni-Forge...</div>
-      </div>
-    </section>
-
-    <!-- SIDEBAR: WORK QUEUE & LIEUTENANT CHAT -->
-    <aside class="w-80 border-l border-sand-300 bg-[#EFECE6] flex flex-col justify-between shrink-0">
-      
-      <!-- WORK QUEUE -->
-      <div class="p-4 border-b border-sand-300 flex-1 overflow-y-auto">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-sand-500 mb-3">WORK QUEUE</h3>
-        <div id="work-queue-list" class="space-y-2.5 text-xs">
-          <!-- Renderizado dinamicamente -->
-          <div class="text-sand-400 italic">Nenhum agente em execução no momento.</div>
+        <div class="flex items-center space-x-3 text-[11px] font-mono">
+          <div
+            id="preview-status-api"
+            class="flex items-center space-x-1 text-sand-400"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-sand-600"></span>
+            <span>API :3010</span>
+          </div>
+          <div
+            id="preview-status-app"
+            class="flex items-center space-x-1 text-sand-400"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-sand-600"></span>
+            <span>App :5183</span>
+          </div>
+          <div
+            id="preview-status-store"
+            class="flex items-center space-x-1 text-sand-400"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-sand-600"></span>
+            <span>Store :4010</span>
+          </div>
         </div>
       </div>
 
-      <!-- LIEUTENANT CONVERSATIONAL PANE -->
-      <div class="h-80 flex flex-col bg-[#F7F6F3] border-t border-sand-300">
-        <div class="px-4 py-2 bg-sand-200 border-b border-sand-300 flex items-center justify-between text-xs font-semibold text-sand-700">
-          <span>LIEUTENANT</span>
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+      <div class="flex items-center space-x-2">
+        <button
+          id="btn-start-preview"
+          onclick="startPreviewTrio()"
+          class="bg-emerald-700 hover:bg-emerald-600 text-white font-medium px-3 py-1 rounded transition-colors flex items-center space-x-1 shadow-sm"
+        >
+          <span>🚀</span>
+          <span>Subir Trio de Preview</span>
+        </button>
+        <a
+          id="btn-open-preview-app"
+          href="http://localhost:5183"
+          target="_blank"
+          class="hidden bg-[#0066FF] hover:bg-blue-600 text-white font-medium px-3 py-1 rounded transition-colors flex items-center space-x-1 shadow-sm"
+        >
+          <span>Abrir App ↗</span>
+        </a>
+        <a
+          id="btn-open-preview-store"
+          href="http://localhost:4010"
+          target="_blank"
+          class="hidden bg-sand-700 hover:bg-sand-600 text-white font-medium px-2.5 py-1 rounded transition-colors flex items-center space-x-1"
+        >
+          <span>Store ↗</span>
+        </a>
+        <button
+          id="btn-stop-preview"
+          onclick="stopPreviewTrio()"
+          class="hidden bg-red-800/80 hover:bg-red-700 text-white px-2.5 py-1 rounded font-medium transition-colors"
+        >
+          ⏹ Desligar
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN BODY: KANBAN BOARDS (ESQUERDA) + WORK QUEUE & TELEMETRIA (DIREITA) -->
+    <main class="flex-1 flex overflow-hidden">
+      <!-- ÁREA DOS PROJETOS E KANBAN -->
+      <section class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div id="projects-container" class="space-y-6">
+          <!-- Renderizado dinamicamente pelo app.js -->
+          <div class="text-center py-12 text-sand-400">
+            Carregando esteiras do Omni-Forge...
+          </div>
         </div>
-        
-        <div id="lieutenant-messages" class="flex-1 p-3 overflow-y-auto text-xs space-y-2 font-mono text-sand-800">
-          <div class="bg-white p-2.5 rounded border border-sand-200 shadow-sm leading-relaxed">
-            <span class="font-bold text-sand-900 block mb-0.5">Lieutenant:</span>
-            Olá! Omni-Forge está ativo e monitorando seus repositórios. Escolha ou adicione projetos para acompanhar a esteira autônoma.
+      </section>
+
+      <!-- SIDEBAR: WORK QUEUE & RESUMO DE TELEMETRIA -->
+      <aside
+        class="w-80 border-l border-sand-300 bg-[#EFECE6] flex flex-col justify-between shrink-0"
+      >
+        <!-- WORK QUEUE -->
+        <div class="p-4 flex-1 overflow-y-auto space-y-4">
+          <div
+            class="flex items-center justify-between pb-2 border-b border-sand-300"
+          >
+            <h3
+              class="text-xs font-bold uppercase tracking-wider text-sand-500"
+            >
+              WORK QUEUE
+            </h3>
+            <span
+              id="queue-badge"
+              class="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-sand-300 text-sand-800"
+              >0 ativos</span
+            >
+          </div>
+
+          <div id="work-queue-list" class="space-y-2.5 text-xs">
+            <!-- Renderizado dinamicamente -->
+            <div class="text-sand-400 italic">
+              Nenhum agente em execução no momento.
+            </div>
           </div>
         </div>
 
-        <form id="lieutenant-form" onsubmit="sendLieutenantMessage(event)" class="p-2.5 bg-white border-t border-sand-300 flex space-x-2">
-          <input id="lieutenant-input" type="text" placeholder="Ordem ao Lieutenant..." class="flex-1 text-xs px-2.5 py-1.5 rounded border border-sand-300 focus:outline-none focus:border-sand-500">
-          <button type="submit" class="bg-sand-800 hover:bg-sand-900 text-white text-xs px-3 py-1.5 rounded font-medium">Enviar</button>
+        <!-- FOOTER DE TELEMETRIA -->
+        <div
+          class="p-4 bg-sand-200/70 border-t border-sand-300 space-y-2 text-[11px] text-sand-600"
+        >
+          <div class="flex items-center justify-between">
+            <span>Modo de Operação:</span>
+            <span class="font-bold text-sand-800">Híbrido (Antigravity)</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Esteira Padrão:</span>
+            <span
+              id="active-packs-summary"
+              class="font-mono font-medium text-sand-700"
+              >Four-Pack</span
+            >
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Portão de Atenção:</span>
+            <span
+              id="attention-gate-status"
+              class="text-emerald-700 font-semibold flex items-center space-x-1"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>Desobstruído</span>
+            </span>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- MODAL: ADICIONAR PROJETO -->
+    <div
+      id="modal-add-project"
+      class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 border border-sand-200 space-y-4"
+      >
+        <div
+          class="flex justify-between items-center border-b border-sand-100 pb-3"
+        >
+          <h3 class="font-bold text-sm text-sand-900">
+            Cadastrar Novo Projeto no Forge
+          </h3>
+          <button
+            onclick="closeAddProjectModal()"
+            class="text-sand-400 hover:text-sand-600"
+          >
+            &times;
+          </button>
+        </div>
+
+        <form onsubmit="submitAddProject(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-medium mb-1">Nome do Projeto</label>
+            <input
+              id="new-project-name"
+              type="text"
+              required
+              placeholder="Ex: Meu App, Billing Service, etc."
+              class="w-full border border-sand-300 rounded p-2"
+            />
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1"
+              >Caminho Absoluto no Disco</label
+            >
+            <input
+              id="new-project-path"
+              type="text"
+              required
+              placeholder="/Users/nome/dev/meu-projeto"
+              class="w-full border border-sand-300 rounded p-2 font-mono"
+            />
+            <p class="text-[10px] text-sand-500 mt-1">
+              Insira o caminho local do repositório onde a esteira atuará.
+            </p>
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">Topologia de Pack</label>
+            <select
+              id="new-project-pack"
+              class="w-full border border-sand-300 rounded p-2"
+            >
+              <option value="four-pack">
+                Four-Pack: Specifier ➔ Coder ➔ Refactorer ➔ Guardian (Padrão
+                80%)
+              </option>
+              <option value="two-pack">
+                Two-Pack: Coder ➔ Cleaner (Rápido / Spikes)
+              </option>
+              <option value="six-pack">
+                Six-Pack: Specifier ➔ Coder ➔ Cleaner ➔ Architect ➔ Hardening ➔
+                QA
+              </option>
+            </select>
+          </div>
+
+          <div class="flex items-center space-x-2 pt-1">
+            <input
+              type="checkbox"
+              id="new-project-init"
+              checked
+              class="rounded border-sand-300"
+            />
+            <label for="new-project-init" class="text-sand-700"
+              >Inicializar governança `.harness` se ainda não existir</label
+            >
+          </div>
+
+          <div class="flex justify-end space-x-2 pt-3 border-t border-sand-100">
+            <button
+              type="button"
+              onclick="closeAddProjectModal()"
+              class="px-3 py-1.5 border border-sand-300 rounded text-sand-700 hover:bg-sand-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-1.5 bg-sand-900 text-white rounded font-medium hover:bg-black"
+            >
+              Adicionar
+            </button>
+          </div>
         </form>
       </div>
-
-    </aside>
-
-  </main>
-
-  <!-- MODAL: ADICIONAR PROJETO -->
-  <div id="modal-add-project" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 border border-sand-200 space-y-4">
-      <div class="flex justify-between items-center border-b border-sand-100 pb-3">
-        <h3 class="font-bold text-sm text-sand-900">Cadastrar Novo Projeto no Forge</h3>
-        <button onclick="closeAddProjectModal()" class="text-sand-400 hover:text-sand-600">&times;</button>
-      </div>
-
-      <form onsubmit="submitAddProject(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-medium mb-1">Nome do Projeto</label>
-          <input id="new-project-name" type="text" required placeholder="Ex: Meu App, Billing Service, etc." class="w-full border border-sand-300 rounded p-2">
-        </div>
-
-        <div>
-          <label class="block font-medium mb-1">Caminho Absoluto no Disco</label>
-          <input id="new-project-path" type="text" required placeholder="/Users/nome/dev/meu-projeto" class="w-full border border-sand-300 rounded p-2 font-mono">
-          <p class="text-[10px] text-sand-500 mt-1">Insira o caminho local do repositório onde a esteira atuará.</p>
-        </div>
-
-        <div>
-          <label class="block font-medium mb-1">Topologia de Pack</label>
-          <select id="new-project-pack" class="w-full border border-sand-300 rounded p-2">
-            <option value="four-pack">Four-Pack: Specifier ➔ Coder ➔ Refactorer ➔ Guardian (Padrão 80%)</option>
-            <option value="two-pack">Two-Pack: Coder ➔ Cleaner (Rápido / Spikes)</option>
-            <option value="six-pack">Six-Pack: Specifier ➔ Coder ➔ Cleaner ➔ Architect ➔ Hardening ➔ QA</option>
-          </select>
-        </div>
-
-        <div class="flex items-center space-x-2 pt-1">
-          <input type="checkbox" id="new-project-init" checked class="rounded border-sand-300">
-          <label for="new-project-init" class="text-sand-700">Inicializar governança `.harness` se ainda não existir</label>
-        </div>
-
-        <div class="flex justify-end space-x-2 pt-3 border-t border-sand-100">
-          <button type="button" onclick="closeAddProjectModal()" class="px-3 py-1.5 border border-sand-300 rounded text-sand-700 hover:bg-sand-50">Cancelar</button>
-          <button type="submit" class="px-4 py-1.5 bg-sand-900 text-white rounded font-medium hover:bg-black">Adicionar</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- MODAL: GERENCIAR PROJETOS -->
-  <div id="modal-manage-projects" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 border border-sand-200 space-y-4">
-      <div class="flex justify-between items-center border-b border-sand-100 pb-3">
-        <h3 class="font-bold text-sm text-sand-900">Projetos Monitorados</h3>
-        <button onclick="closeManageProjectsModal()" class="text-sand-400 hover:text-sand-600">&times;</button>
-      </div>
+    <!-- MODAL: GERENCIAR PROJETOS -->
+    <div
+      id="modal-manage-projects"
+      class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 border border-sand-200 space-y-4"
+      >
+        <div
+          class="flex justify-between items-center border-b border-sand-100 pb-3"
+        >
+          <h3 class="font-bold text-sm text-sand-900">Projetos Monitorados</h3>
+          <button
+            onclick="closeManageProjectsModal()"
+            class="text-sand-400 hover:text-sand-600"
+          >
+            &times;
+          </button>
+        </div>
 
-      <div id="manage-projects-list" class="space-y-2.5 text-xs max-h-72 overflow-y-auto">
-        <!-- Renderizado dinamicamente -->
-      </div>
+        <div
+          id="manage-projects-list"
+          class="space-y-2.5 text-xs max-h-72 overflow-y-auto"
+        >
+          <!-- Renderizado dinamicamente -->
+        </div>
 
-      <div class="flex justify-between items-center pt-3 border-t border-sand-100">
-        <button onclick="openAddProjectModal(); closeManageProjectsModal();" class="text-xs text-omni-accent font-medium hover:underline">
-          + Adicionar Outro Projeto
-        </button>
-        <button type="button" onclick="closeManageProjectsModal()" class="px-3 py-1.5 bg-sand-800 text-white rounded font-medium hover:bg-sand-900">Fechar</button>
+        <div
+          class="flex justify-between items-center pt-3 border-t border-sand-100"
+        >
+          <button
+            onclick="
+              openAddProjectModal();
+              closeManageProjectsModal();
+            "
+            class="text-xs text-omni-accent font-medium hover:underline"
+          >
+            + Adicionar Outro Projeto
+          </button>
+          <button
+            type="button"
+            onclick="closeManageProjectsModal()"
+            class="px-3 py-1.5 bg-sand-800 text-white rounded font-medium hover:bg-sand-900"
+          >
+            Fechar
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- MODAL: NOVA TAREFA -->
-  <div id="modal-new-task" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 border border-sand-200 space-y-4">
-      <div class="flex justify-between items-center border-b border-sand-100 pb-3">
-        <h3 class="font-bold text-sm text-sand-900">Despachar Nova Tarefa</h3>
-        <button onclick="closeNewTaskModal()" class="text-sand-400 hover:text-sand-600">&times;</button>
+    <!-- MODAL: NOVA TAREFA -->
+    <div
+      id="modal-new-task"
+      class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 border border-sand-200 space-y-4"
+      >
+        <div
+          class="flex justify-between items-center border-b border-sand-100 pb-3"
+        >
+          <h3 class="font-bold text-sm text-sand-900">Despachar Nova Tarefa</h3>
+          <button
+            onclick="closeNewTaskModal()"
+            class="text-sand-400 hover:text-sand-600"
+          >
+            &times;
+          </button>
+        </div>
+
+        <form onsubmit="submitNewTask(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-medium mb-1">Projeto Alvo</label>
+            <select
+              id="task-project"
+              class="w-full border border-sand-300 rounded p-2"
+            >
+              <!-- Populado dinamicamente -->
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">ID da Tarefa / Spec</label>
+            <input
+              id="task-id"
+              type="text"
+              required
+              placeholder="T-101-auth-jwt"
+              class="w-full border border-sand-300 rounded p-2"
+            />
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1"
+              >Título / Descrição Curta</label
+            >
+            <input
+              id="task-title"
+              type="text"
+              required
+              placeholder="Implementar validação de token e testes Red"
+              class="w-full border border-sand-300 rounded p-2"
+            />
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">Papel Inicial</label>
+            <select
+              id="task-role"
+              class="w-full border border-sand-300 rounded p-2"
+            >
+              <option value="specifier">Specifier (TDD Red)</option>
+              <option value="coder">Coder (TDD Green)</option>
+            </select>
+          </div>
+
+          <div class="flex justify-end space-x-2 pt-3 border-t border-sand-100">
+            <button
+              type="button"
+              onclick="closeNewTaskModal()"
+              class="px-3 py-1.5 border border-sand-300 rounded text-sand-700 hover:bg-sand-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-1.5 bg-sand-900 text-white rounded font-medium hover:bg-black"
+            >
+              Despachar
+            </button>
+          </div>
+        </form>
       </div>
-
-      <form onsubmit="submitNewTask(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-medium mb-1">Projeto Alvo</label>
-          <select id="task-project" class="w-full border border-sand-300 rounded p-2">
-            <!-- Populado dinamicamente -->
-          </select>
-        </div>
-
-        <div>
-          <label class="block font-medium mb-1">ID da Tarefa / Spec</label>
-          <input id="task-id" type="text" required placeholder="T-101-auth-jwt" class="w-full border border-sand-300 rounded p-2">
-        </div>
-
-        <div>
-          <label class="block font-medium mb-1">Título / Descrição Curta</label>
-          <input id="task-title" type="text" required placeholder="Implementar validação de token e testes Red" class="w-full border border-sand-300 rounded p-2">
-        </div>
-
-        <div>
-          <label class="block font-medium mb-1">Papel Inicial</label>
-          <select id="task-role" class="w-full border border-sand-300 rounded p-2">
-            <option value="specifier">Specifier (TDD Red)</option>
-            <option value="coder">Coder (TDD Green)</option>
-          </select>
-        </div>
-
-        <div class="flex justify-end space-x-2 pt-3 border-t border-sand-100">
-          <button type="button" onclick="closeNewTaskModal()" class="px-3 py-1.5 border border-sand-300 rounded text-sand-700 hover:bg-sand-50">Cancelar</button>
-          <button type="submit" class="px-4 py-1.5 bg-sand-900 text-white rounded font-medium hover:bg-black">Despachar</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <script src="/app.js"></script>
-</body>
+    <!-- MODAL: DETALHES DO CARD / RAIO-X DO AGENTE (FÁBRICA VISUAL) -->
+    <div
+      id="modal-task-details"
+      class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-xl shadow-2xl max-w-4xl w-full border border-sand-200 overflow-hidden flex flex-col max-h-[92vh]"
+      >
+        <!-- Header do Modal -->
+        <div
+          class="px-6 py-3.5 bg-[#F7F5F0] border-b border-sand-300 flex items-center justify-between"
+        >
+          <div class="flex items-center space-x-3">
+            <span
+              id="detail-task-id"
+              class="font-mono font-bold text-xs bg-sand-200 text-sand-800 px-2.5 py-1 rounded"
+            ></span>
+            <span
+              id="detail-task-status-badge"
+              class="text-[10px] font-bold px-2 py-0.5 rounded uppercase"
+            ></span>
+            <h2
+              id="detail-task-title"
+              class="text-sm font-bold text-sand-900 truncate max-w-md"
+            ></h2>
+          </div>
+          <button
+            onclick="closeTaskDetails()"
+            class="text-sand-400 hover:text-sand-700 text-xl font-bold leading-none"
+          >
+            &times;
+          </button>
+        </div>
+
+        <!-- NAVEGAÇÃO DE TABS -->
+        <div class="flex border-b border-sand-300 px-6 bg-[#FAF8F5] text-xs">
+          <button
+            id="tab-btn-overview"
+            onclick="switchModalTab('overview')"
+            class="px-4 py-2.5 font-bold border-b-2 border-sand-900 text-sand-900 transition-colors flex items-center space-x-1.5"
+          >
+            <span>📋</span>
+            <span>Visão Geral & Handoff</span>
+          </button>
+          <button
+            id="tab-btn-diff"
+            onclick="switchModalTab('diff')"
+            class="px-4 py-2.5 font-medium border-b-2 border-transparent text-sand-600 hover:text-sand-900 transition-colors flex items-center space-x-1.5"
+          >
+            <span>📄</span>
+            <span>Git Diff & Código</span>
+            <span
+              id="tab-diff-badge"
+              class="ml-1 text-[10px] bg-sand-200 text-sand-800 px-1.5 py-0.2 rounded-full font-mono"
+              >0</span
+            >
+          </button>
+          <button
+            id="tab-btn-tests"
+            onclick="switchModalTab('tests')"
+            class="px-4 py-2.5 font-medium border-b-2 border-transparent text-sand-600 hover:text-sand-900 transition-colors flex items-center space-x-1.5"
+          >
+            <span>🧪</span>
+            <span>Testes & Qualidade</span>
+            <span
+              id="tab-tests-badge"
+              class="ml-1 text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded-full font-bold"
+              >Auto</span
+            >
+          </button>
+          <button
+            id="tab-btn-playbook"
+            onclick="switchModalTab('playbook')"
+            class="px-4 py-2.5 font-medium border-b-2 border-transparent text-sand-600 hover:text-sand-900 transition-colors flex items-center space-x-1.5"
+          >
+            <span>🎭</span>
+            <span>Playbook Visual & E2E</span>
+            <span
+              id="tab-playbook-badge"
+              class="ml-1 text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.2 rounded-full font-bold"
+              >E2E</span
+            >
+          </button>
+        </div>
+
+        <!-- CORPO COM AS ABAS -->
+        <div class="p-6 overflow-y-auto flex-1 space-y-5 text-xs">
+          <!-- ABA 1: VISÃO GERAL -->
+          <div id="tab-pane-overview" class="space-y-5">
+            <div>
+              <p
+                id="detail-task-project"
+                class="text-sand-600 font-medium text-xs mb-1"
+              ></p>
+            </div>
+
+            <!-- PIPELINE STEPPER -->
+            <div class="bg-sand-50 p-4 rounded-lg border border-sand-200">
+              <h4
+                class="text-[10px] font-bold uppercase tracking-wider text-sand-400 mb-3"
+              >
+                Progresso na Linha de Montagem
+              </h4>
+              <div
+                id="detail-pipeline-stepper"
+                class="flex items-center justify-between"
+              >
+                <!-- Renderizado dinamicamente -->
+              </div>
+            </div>
+
+            <!-- GRID DE INFORMAÇÕES TÉCNICAS -->
+            <div class="grid grid-cols-2 gap-3">
+              <div
+                class="bg-sand-50 p-3 rounded border border-sand-200 space-y-1"
+              >
+                <span
+                  class="text-[10px] font-bold uppercase text-sand-400 block"
+                  >Papel em Execução</span
+                >
+                <span
+                  id="detail-role"
+                  class="font-bold text-sand-900 text-sm"
+                ></span>
+                <p id="detail-role-desc" class="text-[11px] text-sand-500"></p>
+              </div>
+
+              <div
+                class="bg-sand-50 p-3 rounded border border-sand-200 space-y-1"
+              >
+                <span
+                  class="text-[10px] font-bold uppercase text-sand-400 block"
+                  >Worktree Físico Isolado</span
+                >
+                <code
+                  id="detail-worktree"
+                  class="font-mono text-xs font-semibold text-sand-900 bg-sand-200/80 px-2 py-0.5 rounded inline-block"
+                ></code>
+                <span class="text-[10px] text-sand-400 block"
+                  >Ambiente git isolado sem conflito</span
+                >
+              </div>
+
+              <div
+                class="bg-sand-50 p-3 rounded border border-sand-200 space-y-1"
+              >
+                <span
+                  class="text-[10px] font-bold uppercase text-sand-400 block"
+                  >Último Commit / SHA</span
+                >
+                <code
+                  id="detail-commit"
+                  class="font-mono text-xs text-omni-accent font-semibold"
+                ></code>
+              </div>
+
+              <div
+                class="bg-sand-50 p-3 rounded border border-sand-200 space-y-1"
+              >
+                <span
+                  class="text-[10px] font-bold uppercase text-sand-400 block"
+                  >Horário da Última Ação</span
+                >
+                <span
+                  id="detail-updated"
+                  class="text-sand-700 font-mono text-xs"
+                ></span>
+              </div>
+            </div>
+
+            <!-- GUIA DE TESTE PRÁTICO -->
+            <div
+              id="detail-test-guide-container"
+              class="hidden bg-emerald-50/80 border border-emerald-200 rounded-lg p-4 space-y-2"
+            >
+              <div
+                class="flex items-center space-x-2 text-emerald-800 font-bold text-xs"
+              >
+                <span>🧪</span>
+                <span>Roteiro de Validação Prática (O Que & Como Testar)</span>
+              </div>
+              <div
+                id="detail-test-guide-content"
+                class="text-sand-800 text-xs space-y-2 leading-relaxed"
+              ></div>
+            </div>
+
+            <!-- MANIFESTO DO HANDOFF -->
+            <div>
+              <h4
+                class="text-[10px] font-bold uppercase tracking-wider text-sand-400 mb-1.5"
+              >
+                Manifesto do Handoff (JSON)
+              </h4>
+              <pre
+                id="detail-json"
+                class="bg-[#1C1B1A] text-emerald-400 p-3.5 rounded-lg text-[11px] font-mono overflow-x-auto border border-sand-800 max-h-48"
+              ></pre>
+            </div>
+          </div>
+
+          <!-- ABA 2: GIT DIFF & CÓDIGO -->
+          <div id="tab-pane-diff" class="hidden space-y-4">
+            <div
+              class="flex items-center justify-between p-3 bg-sand-100 rounded-lg border border-sand-200"
+            >
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-sand-900">Resumo do Patch:</span>
+                <span id="diff-summary-text" class="text-sand-700 font-medium"
+                  >Carregando diff...</span
+                >
+              </div>
+              <button
+                onclick="refreshCurrentTaskDiff()"
+                class="text-xs bg-white hover:bg-sand-50 text-sand-800 border border-sand-300 px-2.5 py-1 rounded font-medium shadow-sm transition-colors"
+              >
+                ↻ Atualizar Diff
+              </button>
+            </div>
+
+            <!-- Lista de Arquivos Modificados -->
+            <div id="diff-files-container" class="space-y-1.5">
+              <!-- Renderizado dinamicamente -->
+            </div>
+
+            <!-- Visualizador de Código Unificado -->
+            <div class="border border-sand-300 rounded-lg overflow-hidden">
+              <div
+                class="bg-[#2E2D2B] text-sand-200 px-4 py-2 text-[11px] font-mono flex items-center justify-between border-b border-sand-800"
+              >
+                <span>PATCH UNIFICADO (GIT DIFF)</span>
+                <span class="text-[10px] text-sand-400"
+                  >Verde = Adicionado | Vermelho = Removido</span
+                >
+              </div>
+              <div
+                id="diff-viewer-code"
+                class="bg-[#1C1B1A] text-sand-100 p-4 font-mono text-[11px] leading-relaxed overflow-x-auto max-h-[420px] select-text"
+              >
+                <!-- Renderizado dinamicamente com destaque de sintaxe -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ABA 3: TESTES & QUALIDADE -->
+          <div id="tab-pane-tests" class="hidden space-y-4">
+            <div
+              class="flex items-center justify-between p-4 bg-sand-100 rounded-lg border border-sand-200"
+            >
+              <div>
+                <h4 class="font-bold text-sand-900 text-xs">
+                  Suíte de Testes Automatizados
+                </h4>
+                <p class="text-sand-500 text-[11px]">
+                  Executa a validação TDD (Vitest/Jest) diretamente no diretório
+                  do worktree
+                </p>
+              </div>
+              <button
+                id="btn-run-tests-action"
+                onclick="runCurrentTaskTests()"
+                class="px-4 py-2 bg-[#1F493D] hover:bg-[#16362D] text-white font-semibold text-xs rounded shadow-sm transition-colors flex items-center space-x-1.5"
+              >
+                <span>▶</span>
+                <span>Executar Testes Agora</span>
+              </button>
+            </div>
+
+            <!-- Métricas de Teste -->
+            <div id="tests-metrics-grid" class="grid grid-cols-4 gap-3">
+              <div class="bg-sand-50 p-3 rounded border border-sand-200">
+                <span
+                  class="text-[10px] font-bold uppercase text-sand-400 block"
+                  >Status</span
+                >
+                <span
+                  id="test-metric-status"
+                  class="text-sm font-bold text-sand-700"
+                  >Aguardando</span
+                >
+              </div>
+              <div class="bg-sand-50 p-3 rounded border border-sand-200">
+                <span
+                  class="text-[10px] font-bold uppercase text-sand-400 block"
+                  >Duração</span
+                >
+                <span
+                  id="test-metric-duration"
+                  class="text-sm font-bold text-sand-700"
+                  >-</span
+                >
+              </div>
+              <div class="bg-sand-50 p-3 rounded border border-sand-200">
+                <span
+                  class="text-[10px] font-bold uppercase text-sand-400 block"
+                  >Testes OK</span
+                >
+                <span
+                  id="test-metric-passed"
+                  class="text-sm font-bold text-emerald-600"
+                  >-</span
+                >
+              </div>
+              <div class="bg-sand-50 p-3 rounded border border-sand-200">
+                <span
+                  class="text-[10px] font-bold uppercase text-sand-400 block"
+                  >Falhas</span
+                >
+                <span
+                  id="test-metric-failed"
+                  class="text-sm font-bold text-red-600"
+                  >0</span
+                >
+              </div>
+            </div>
+
+            <!-- Terminal Output de Testes -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <h4
+                  class="text-[10px] font-bold uppercase tracking-wider text-sand-400"
+                >
+                  Terminal Output (stdout / stderr)
+                </h4>
+                <span
+                  id="test-run-spinner"
+                  class="hidden text-xs text-omni-accent font-mono animate-pulse"
+                  >Executando suíte de testes...</span
+                >
+              </div>
+              <pre
+                id="test-terminal-output"
+                class="bg-[#1C1B1A] text-emerald-400 p-4 rounded-lg text-[11px] font-mono overflow-x-auto border border-sand-800 max-h-72 leading-relaxed"
+              >
+Clique em 'Executar Testes Agora' para rodar a suíte.</pre
+              >
+            </div>
+          </div>
+
+          <!-- ABA 4: PLAYBOOK VISUAL HUMANO & E2E RUNNER -->
+          <div id="tab-pane-playbook" class="hidden space-y-5">
+            <!-- NOTICE: TWO-PACK TOPOLOGY (QUICK SPIKE) -->
+            <div
+              id="playbook-two-pack-notice"
+              class="hidden bg-amber-50/90 border border-amber-200 rounded-lg p-5 text-xs space-y-2"
+            >
+              <div class="flex items-center space-x-2 text-amber-900 font-bold">
+                <span>⚡</span>
+                <span
+                  >Topologia Two-Pack: Rápida & Enxuta (Coder ➔ Cleaner)</span
+                >
+              </div>
+              <p class="text-amber-800 leading-relaxed">
+                Este projeto está operando na topologia
+                <strong>Two-Pack</strong>, voltada para spikes rápidos,
+                prototipagem e correções com TDD unitário direto.
+              </p>
+              <p class="text-amber-700 leading-relaxed">
+                O pipeline formal de testes visuais E2E com gravação Codegen e
+                refinamento por IA é ativado nas esteiras de produção
+                <strong>Four-Pack</strong> (papel <em>Guardian</em>) e
+                <strong>Six-Pack</strong> (papel <em>QA</em>).
+              </p>
+            </div>
+
+            <!-- FLUXO DE DESENVOLVIMENTO: PASSO A PASSO GUIADO (FOUR-PACK & SIX-PACK) -->
+            <div id="playbook-workflow-container" class="space-y-5">
+              <!-- STEPPER DO FLUXO DE VALIDAÇÃO -->
+              <div class="bg-sand-100 p-3 rounded-lg border border-sand-300">
+                <div
+                  class="text-[10px] font-bold uppercase tracking-wider text-sand-500 mb-2 flex items-center justify-between"
+                >
+                  <span>ESTEIRA DE VALIDAÇÃO: DO PREVIEW AO TESTE E2E</span>
+                  <span
+                    id="playbook-pack-stage-badge"
+                    class="font-mono text-[9px] bg-sand-200 text-sand-800 px-1.5 py-0.5 rounded font-bold uppercase"
+                    >Four-Pack • Guardian Gate</span
+                  >
+                </div>
+                <div class="grid grid-cols-4 gap-2 text-center text-[10px]">
+                  <div
+                    class="p-2 bg-white rounded border border-sand-200 flex flex-col items-center space-y-0.5 shadow-sm"
+                  >
+                    <span
+                      class="w-4 h-4 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-[9px]"
+                      >1</span
+                    >
+                    <span class="font-bold text-sand-900">Preview Ativo</span>
+                    <span class="text-[9px] text-sand-500"
+                      >Portas 3010 / 5183</span
+                    >
+                  </div>
+                  <div
+                    class="p-2 bg-white rounded border border-sand-200 flex flex-col items-center space-y-0.5 shadow-sm"
+                  >
+                    <span
+                      class="w-4 h-4 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-[9px]"
+                      >2</span
+                    >
+                    <span class="font-bold text-sand-900">Roteiro Visual</span>
+                    <span class="text-[9px] text-sand-500"
+                      >Checklist Humano</span
+                    >
+                  </div>
+                  <div
+                    class="p-2 bg-white rounded border border-sand-200 flex flex-col items-center space-y-0.5 shadow-sm"
+                  >
+                    <span
+                      class="w-4 h-4 rounded-full bg-rose-600 text-white font-bold flex items-center justify-center text-[9px]"
+                      >3</span
+                    >
+                    <span class="font-bold text-sand-900"
+                      >Gravação Codegen</span
+                    >
+                    <span class="text-[9px] text-sand-500"
+                      >Mapear Ações na Tela</span
+                    >
+                  </div>
+                  <div
+                    class="p-2 bg-white rounded border border-sand-200 flex flex-col items-center space-y-0.5 shadow-sm"
+                  >
+                    <span
+                      class="w-4 h-4 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-[9px]"
+                      >4</span
+                    >
+                    <span class="font-bold text-sand-900">Refino IA & E2E</span>
+                    <span class="text-[9px] text-sand-500"
+                      >Sanitizar & Executar</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Radar de Governança Semáforo -->
+              <div
+                class="bg-sand-50 p-4 rounded-lg border border-sand-200 space-y-3"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-sm">🛡️</span>
+                    <h4 class="font-bold text-sand-900 text-xs">
+                      Radar de Governança & Qualidade do Código
+                    </h4>
+                  </div>
+                  <button
+                    onclick="refreshTaskGovernance()"
+                    class="text-[11px] bg-white hover:bg-sand-100 text-sand-700 border border-sand-300 px-2 py-0.5 rounded shadow-sm"
+                  >
+                    ↻ Verificar Regras
+                  </button>
+                </div>
+
+                <div id="governance-grid" class="grid grid-cols-3 gap-3">
+                  <!-- Semáforo 1: Tenant Isolation -->
+                  <div
+                    id="gov-card-tenant"
+                    class="bg-white p-3 rounded border border-sand-200 space-y-1 transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span
+                        class="text-[10px] font-bold uppercase tracking-wider text-sand-500"
+                        >Tenant Isolation</span
+                      >
+                      <span
+                        id="gov-badge-tenant"
+                        class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sand-200 text-sand-700"
+                        >Verificando...</span
+                      >
+                    </div>
+                    <p id="gov-desc-tenant" class="text-[11px] text-sand-600">
+                      Checagem de .where('tenant_id') em queries
+                    </p>
+                  </div>
+
+                  <!-- Semáforo 2: Complexidade M < 5 -->
+                  <div
+                    id="gov-card-complexity"
+                    class="bg-white p-3 rounded border border-sand-200 space-y-1 transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span
+                        class="text-[10px] font-bold uppercase tracking-wider text-sand-500"
+                        >Complexidade (M &lt; 5)</span
+                      >
+                      <span
+                        id="gov-badge-complexity"
+                        class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sand-200 text-sand-700"
+                        >Verificando...</span
+                      >
+                    </div>
+                    <p
+                      id="gov-desc-complexity"
+                      class="text-[11px] text-sand-600"
+                    >
+                      Funções &lt; 150 linhas e baixa ramificação
+                    </p>
+                  </div>
+
+                  <!-- Semáforo 3: Strict Typing Zero Any -->
+                  <div
+                    id="gov-card-typing"
+                    class="bg-white p-3 rounded border border-sand-200 space-y-1 transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span
+                        class="text-[10px] font-bold uppercase tracking-wider text-sand-500"
+                        >Zero Any (TS)</span
+                      >
+                      <span
+                        id="gov-badge-typing"
+                        class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sand-200 text-sand-700"
+                        >Verificando...</span
+                      >
+                    </div>
+                    <p id="gov-desc-typing" class="text-[11px] text-sand-600">
+                      Tipagem estrita sem coerção perigosa
+                    </p>
+                  </div>
+                </div>
+                <div
+                  id="governance-details-box"
+                  class="hidden text-[11px] p-2.5 bg-amber-50 border border-amber-200 rounded text-amber-900 font-mono"
+                ></div>
+              </div>
+
+              <!-- Playbook de Teste Visual Humano (Passo a Passo) -->
+              <div
+                class="bg-sand-50 p-4 rounded-lg border border-sand-200 space-y-3"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-sm">👁️</span>
+                    <h4 class="font-bold text-sand-900 text-xs">
+                      Playbook de Teste Visual Humano (Passo a Passo)
+                    </h4>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <button
+                      id="btn-record-e2e"
+                      onclick="startInteractiveRecording()"
+                      class="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white font-semibold text-xs rounded shadow-sm transition-colors flex items-center space-x-1.5"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full bg-white animate-pulse"
+                      ></span>
+                      <span>🎥 Gravar Minhas Ações (Codegen)</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  id="playbook-checklist-container"
+                  class="space-y-2 text-xs"
+                >
+                  <!-- Checkpoints interativos gerados a partir do handoff e roteiro -->
+                </div>
+              </div>
+
+              <!-- PAINEL DE GRAVAÇÃO ATIVA & REFINAMENTO COM IA -->
+              <div
+                id="ai-refine-container"
+                class="hidden bg-purple-50/80 border border-purple-200 rounded-lg p-4 space-y-3 transition-all"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-sm">✨</span>
+                    <h4 class="font-bold text-purple-950 text-xs">
+                      Refinador de Testes E2E com IA
+                    </h4>
+                    <span
+                      id="ai-refine-status-badge"
+                      class="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-purple-200 text-purple-900 uppercase"
+                      >Processando</span
+                    >
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <button
+                      onclick="requestAIRefinement()"
+                      class="px-2.5 py-1 bg-white hover:bg-purple-100 border border-purple-300 text-purple-900 text-xs rounded shadow-sm font-medium transition-colors"
+                    >
+                      ↻ Re-analisar com IA
+                    </button>
+                    <button
+                      id="btn-save-refined-test"
+                      onclick="saveRefinedTest()"
+                      class="px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs rounded shadow-sm transition-colors flex items-center space-x-1"
+                    >
+                      <span>✓</span>
+                      <span>Salvar Teste Refinado</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Métricas da Otimização da IA -->
+                <div class="grid grid-cols-3 gap-3 text-xs">
+                  <div class="bg-white p-2.5 rounded border border-purple-200">
+                    <span
+                      class="text-[10px] uppercase font-bold text-sand-500 block"
+                      >Cliques Redundantes</span
+                    >
+                    <span
+                      id="ai-metric-removed-clicks"
+                      class="text-sm font-bold text-rose-600 font-mono"
+                      >0 removidos</span
+                    >
+                  </div>
+                  <div class="bg-white p-2.5 rounded border border-purple-200">
+                    <span
+                      class="text-[10px] uppercase font-bold text-sand-500 block"
+                      >Testes Atômicos</span
+                    >
+                    <span
+                      id="ai-metric-split-tests"
+                      class="text-sm font-bold text-purple-800 font-mono"
+                      >1 gerado</span
+                    >
+                  </div>
+                  <div class="bg-white p-2.5 rounded border border-purple-200">
+                    <span
+                      class="text-[10px] uppercase font-bold text-sand-500 block"
+                      >Asserções Injetadas</span
+                    >
+                    <span
+                      id="ai-metric-assertions"
+                      class="text-sm font-bold text-emerald-600 font-mono"
+                      >0 criadas</span
+                    >
+                  </div>
+                </div>
+
+                <p
+                  id="ai-refine-explanation"
+                  class="text-sand-700 text-[11px] leading-relaxed italic bg-white/70 p-2.5 rounded border border-purple-100"
+                ></p>
+
+                <!-- Visualizador do Código Refinado -->
+                <div
+                  class="border border-purple-200 rounded-lg overflow-hidden"
+                >
+                  <div
+                    class="bg-[#2E2D2B] text-purple-200 px-3 py-1.5 text-[10px] font-mono flex items-center justify-between border-b border-sand-800"
+                  >
+                    <span>CÓDIGO DE TESTE E2E LIMPO & REFINADO PELA IA</span>
+                    <span class="text-sand-400"
+                      >TypeScript / Playwright Specs</span
+                    >
+                  </div>
+                  <pre
+                    id="ai-refined-code-viewer"
+                    class="bg-[#1C1B1A] text-purple-300 p-3 font-mono text-[11px] leading-relaxed overflow-x-auto max-h-48 select-text"
+                  ></pre>
+                </div>
+              </div>
+
+              <!-- Runner E2E Agnóstico (Cypress, Playwright, WebdriverIO, npm) -->
+              <div
+                class="bg-sand-50 p-4 rounded-lg border border-sand-200 space-y-3"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4
+                      class="font-bold text-sand-900 text-xs flex items-center space-x-2"
+                    >
+                      <span>🎭</span>
+                      <span>Automação E2E (End-to-End)</span>
+                      <span
+                        id="e2e-detected-badge"
+                        class="text-[10px] font-mono bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-bold uppercase"
+                        >Detectando Motor...</span
+                      >
+                    </h4>
+                    <p id="e2e-detected-desc" class="text-sand-500 text-[11px]">
+                      Suporta Cypress, Playwright, WebdriverIO ou scripts do
+                      package.json
+                    </p>
+                  </div>
+                  <button
+                    id="btn-run-e2e-action"
+                    onclick="runCurrentTaskE2E()"
+                    class="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-semibold text-xs rounded shadow-sm transition-colors flex items-center space-x-1.5"
+                  >
+                    <span>▶</span>
+                    <span id="btn-run-e2e-text">Rodar Testes E2E</span>
+                  </button>
+                </div>
+
+                <!-- Terminal Output -->
+                <div class="border border-sand-300 rounded-lg overflow-hidden">
+                  <div
+                    class="bg-[#2E2D2B] text-sand-200 px-4 py-2 text-[11px] font-mono flex items-center justify-between border-b border-sand-800"
+                  >
+                    <span id="e2e-terminal-header">E2E EXECUTION LOGS</span>
+                    <span
+                      id="e2e-run-spinner"
+                      class="hidden text-xs text-purple-400 font-mono animate-pulse"
+                      >Executando suíte E2E...</span
+                    >
+                  </div>
+                  <pre
+                    id="e2e-terminal-output"
+                    class="bg-[#1C1B1A] text-purple-300 p-4 font-mono text-[11px] leading-relaxed overflow-x-auto max-h-56 select-text"
+                  >
+Clique em 'Rodar Testes E2E' para disparar a suíte detectada no projeto.</pre
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rodapé com Ações Rápidas de Alta Produtividade -->
+        <div
+          class="px-6 py-3 bg-sand-50 border-t border-sand-200 flex items-center justify-between"
+        >
+          <div class="flex items-center space-x-2">
+            <button
+              onclick="openCurrentTaskInEditor()"
+              title="Abrir pasta no Cursor ou VSCode"
+              class="px-3 py-1.5 bg-white hover:bg-sand-100 border border-sand-300 text-sand-800 rounded font-medium text-xs transition-colors flex items-center space-x-1 shadow-sm"
+            >
+              <span>💻</span>
+              <span>Abrir no Editor</span>
+            </button>
+            <button
+              onclick="runCurrentTaskTests()"
+              title="Rodar testes no worktree"
+              class="px-3 py-1.5 bg-white hover:bg-sand-100 border border-sand-300 text-sand-800 rounded font-medium text-xs transition-colors flex items-center space-x-1 shadow-sm"
+            >
+              <span>🧪</span>
+              <span>Testar</span>
+            </button>
+            <button
+              id="btn-modal-merge"
+              onclick="mergeCurrentTask()"
+              title="Fazer merge da branch do worktree"
+              class="px-3 py-1.5 bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-800 rounded font-medium text-xs transition-colors flex items-center space-x-1 shadow-sm"
+            >
+              <span>🔀</span>
+              <span>Merge</span>
+            </button>
+            <div
+              id="detail-attention-actions"
+              class="flex items-center space-x-2 pl-2 border-l border-sand-300"
+            >
+              <!-- Botões de Approve / Reject renderizados dinamicamente -->
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button
+              id="btn-advance-manual"
+              onclick="advanceTaskManually()"
+              class="px-3.5 py-1.5 bg-[#2B3530] hover:bg-[#1E2522] text-white rounded font-medium text-xs shadow-sm transition-colors flex items-center space-x-1"
+            >
+              <span>Avançar Próximo Papel ➔</span>
+            </button>
+            <button
+              type="button"
+              onclick="closeTaskDetails()"
+              class="px-4 py-1.5 bg-sand-200 hover:bg-sand-300 text-sand-800 rounded font-medium text-xs transition-colors"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
 </html>
