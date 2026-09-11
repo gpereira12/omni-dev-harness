@@ -73,6 +73,49 @@ export function StudentForm() {
 }
 ```
 
+### Ergonomia de Entrada Mobile Obrigatória (Input Modes & Keypads)
+
+Em interfaces com acesso móvel (Web Responsiva ou PWA), **campos conceituais numéricos nunca devem exibir teclado QWERTY alfanumérico**.
+
+```tsx
+// 1. Telefone / Celular (ativa dialer e sugestão de contato do aparelho)
+<input
+  type="tel"
+  inputMode="tel"
+  autoComplete="tel"
+  placeholder="(11) 99999-9999"
+  {...register("phone")}
+/>
+
+// 2. Documentos com máscara (CPF, CNPJ, CEP, Cartão de Crédito)
+// ATENÇÃO: NÃO use type="number"! Use inputMode="numeric" + pattern="[0-9]*"
+<input
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  placeholder="000.000.000-00"
+  {...register("cpf")}
+/>
+
+// 3. Código de Verificação SMS / 2FA (OTP)
+<input
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  autoComplete="one-time-code"
+  maxLength={6}
+  {...register("otpCode")}
+/>
+
+// 4. Preços e Valores com Casas Decimais
+<input
+  type="text"
+  inputMode="decimal"
+  placeholder="0,00"
+  {...register("amount")}
+/>
+```
+
 ---
 
 ## 3. Os 5 Estados Canônicos de UI & Resiliência

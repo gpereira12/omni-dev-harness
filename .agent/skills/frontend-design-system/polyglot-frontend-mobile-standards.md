@@ -19,6 +19,7 @@ Este guia estabelece os equivalentes canônicos de gerenciamento de estado, form
 - **Server State (Offline Persistent)**: **TanStack Query** integrado com `@tanstack/query-async-storage-persister` para cache em disco.
 - **Global Client State**: **Zustand** (mesma API da Web com seletores atômicos).
 - **Forms & Validation**: **React Hook Form** com `<Controller />` e **Zod**.
+- **Keyboard Ergonomics**: Obrigatório `keyboardType="phone-pad"` (telefone), `keyboardType="number-pad"` (CPF, CNPJ, CEP, OTP) e `keyboardType="decimal-pad"` (valores).
 - **UI Styling**: **NativeWind (Tailwind CSS v4)** para compartilhamento de tokens de design da web.
 - **Toasts & Feedback**: **Burnt** (toasts nativos do iOS/Android) ou `react-native-toast-message`.
 - **Local Database**: **WatermelonDB** ou **OP-SQLite** para aplicações offline-first com sync engine.
@@ -37,6 +38,7 @@ Este guia estabelece os equivalentes canônicos de gerenciamento de estado, form
       data class Error(val message: String) : UIState<Nothing>
   }
   ```
+- **Keyboard Options**: Obrigatório `keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)` (telefone), `KeyboardType.Number` (CPF, CEP, códigos) e `KeyboardType.Decimal` (preços/valores).
 - **Server State & Cache**: **Retrofit / Ktor** + **Room Database** (Single Source of Truth pattern).
 - **Feedback**: `SnackbarHostState` para alertas e validação de botões desabilitados via `enabled = !uiState.isLoading`.
 
@@ -46,6 +48,7 @@ Este guia estabelece os equivalentes canônicos de gerenciamento de estado, form
 
 - **Architecture**: **MVVM** com a macro `@Observable` (iOS 17+) ou **TCA (The Composable Architecture)**.
 - **State Management**: `@Observable` classes consumidas via `@State` e `@Binding`.
+- **Keyboard Ergonomics**: Obrigatório `.keyboardType(.phonePad)` (telefone), `.keyboardType(.numberPad)` (CPF, CEP, OTP) e `.keyboardType(.decimalPad)` (valores monetários).
 - **Server State & Persistence**: `URLSession` assíncrona (`async/await`) + **SwiftData** para armazenamento local.
 - **Tactile Feedback**: Haptics nativos disparados em mutações de sucesso:
   ```swift

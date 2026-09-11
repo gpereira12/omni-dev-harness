@@ -21,8 +21,9 @@
    - *Se o projeto NÃO possuir MCP*: Consulte a base de conhecimento permanente em `knowledge/lessons-learned/` e os ADRs em `.planning/decisions/`.
 1. **Contexto é Orçamento (Zero Bloat)**:
    - Não carregue arquivos completos às cegas na conversa. Use assinaturas de tipos (`.d.ts`), mapas de rotas e grafos de dependência para navegação cirúrgica.
-2. **Design System & UI Catalog-First (Projetos Frontend)**:
+2. **Design System, UI Catalog-First & Ergonomia Mobile (Projetos Frontend)**:
    - Se o projeto possuir uma biblioteca/catálogo de componentes interno (ex: `@/core/ui`, `components/ui`) ou tema dinâmico, é **PROIBIDO** instanciar componentes crus de terceiros ou cores hexadecimais fixas. Utilize SEMPRE os componentes internos e as variáveis/tokens do tema.
+   - **Ergonomia de Entrada Mobile Obrigatória**: Em qualquer interface com suporte mobile (Web responsiva, PWA ou App nativo/híbrido), campos conceitualmente numéricos (telefone, CPF, CNPJ, CEP, códigos de validação OTP, cartão de crédito, valores e quantidades) DEVEM disparar diretamente o teclado numérico nativo (`inputMode="numeric"`, `type="tel"`, `pattern="[0-9]*"` no Web/PWA ou `keyboardType="number-pad" / "phone-pad"` em Apps nativos). É proibido abrir teclado alfanumérico padrão para dados numéricos.
 3. **Decisões com Evidência & GSD Vivo**:
    - Toda nova decisão estrutural DEVE ser registrada como um ADR em `.planning/decisions/` contendo evidências empíricas de código (`file://...:line`), no mínimo 2 alternativas avaliadas e prós/contras antes da codificação.
 4. **Spec-First & Fronteira Rígida (Anti-Scope Creep)**:

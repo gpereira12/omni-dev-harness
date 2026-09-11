@@ -50,10 +50,14 @@ Todo frontend e interface construída neste ecossistema deve aplicar rigorosamen
 ## 2. O Princípio do Mínimo Esforço (Law of Least Effort)
 
 1. **Smart Defaults**: Campos de formulário devem vir pré-selecionados com a opção mais provável para 80% dos usuários.
-2. **Máscaras e Auto-preenchimento Inteligente**:
+2. **Máscaras, Auto-preenchimento e Ergonomia de Entrada**:
    - CEP busca endereço automaticamente (ViaCEP).
    - CNPJ/CPF com formatação automática durante a digitação.
-   - Teclados mobile adequados (`inputMode="numeric"`, `inputMode="email"`).
+   - **Teclados Mobile Ergonômicos Imediatos (Zero Motor Breaks)**:
+     - Telefone/Celular: `type="tel"` / `inputMode="tel"` (teclado de discagem com autofill).
+     - Documentos, Códigos e Valores (CPF, CNPJ, CEP, OTP/SMS, Cartão de Crédito): `inputMode="numeric"` + `pattern="[0-9]*"`.
+     - Valores monetários e medidas: `inputMode="decimal"`.
+     - *Impacto Cognitivo:* Forçar o usuário móvel a clicar na tecla `123` interrompe o ritmo psicomotor (*motor break*) e consome a memória de trabalho ao lidar com números longos (como 11 dígitos de CPF), aumentando drasticamente a taxa de abandono.
 3. **Prevenção de Erros (Inline Validation)**:
    - Valide o campo no evento `onBlur` (após o usuário sair do campo), nunca enquanto ele está digitando a primeira letra.
 

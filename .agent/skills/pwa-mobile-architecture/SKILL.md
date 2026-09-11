@@ -204,6 +204,59 @@ No CSS ou classes Tailwind:
    }
    ```
 
+### C. Ergonomia de Teclados Virtuais Mobile (Input Modes & Keypads)
+
+Em PWAs e aplicações web móveis, o teclado virtual ocupa entre 40% e 50% do display. Exibir o teclado QWERTY completo para dados numéricos é um dos principais fatores de abandono de formulários e erros de preenchimento.
+
+**Regras Mandatórias de Atributos:**
+
+1. **Telefone e Celular**:
+   ```tsx
+   <input
+     type="tel"
+     inputMode="tel"
+     autoComplete="tel"
+     placeholder="(11) 99999-9999"
+   />
+   ```
+   *Dispara o teclado telefônico com caracteres especiais (`+`, `*`, `#`) e ativa preenchimento rápido do contato salvo no dispositivo.*
+
+2. **Documentos e Códigos Formatados (CPF, CNPJ, CEP, Cartão)**:
+   ```tsx
+   <input
+     type="text"
+     inputMode="numeric"
+     pattern="[0-9]*"
+     autoComplete="postal-code" // ou cc-number, conforme o contexto
+     placeholder="000.000.000-00"
+   />
+   ```
+   *O atributo `pattern="[0-9]*"` é mandatório para forçar o numpad no iOS Safari sem perder a capacidade de renderizar máscaras de pontuação.*
+
+3. **Código de Verificação SMS / 2FA (OTP)**:
+   ```tsx
+   <input
+     type="text"
+     inputMode="numeric"
+     pattern="[0-9]*"
+     autoComplete="one-time-code"
+     maxLength={6}
+   />
+   ```
+   *Permite que o teclado do iOS e Android sugira o código recebido via SMS com um único toque acima do teclado.*
+
+4. **Valores Monetários e Decimais**:
+   ```tsx
+   <input
+     type="text"
+     inputMode="decimal"
+     placeholder="0,00"
+   />
+   ```
+   *Abre o teclado numérico contendo separador decimal (vírgula ou ponto, conforme o locale do teclado do usuário).*
+
+> ⚠️ **Atenção (Anti-Pattern):** Nunca use `type="number"` para CPF, CEP ou Telefone. No mobile e desktop, ele descarta zeros à esquerda (ex: `01310-100` vira `1310100` ou quebra), falha ao receber máscara e renderiza setas verticais de incremento (*steppers*) indesejadas.
+
 ---
 
 ## 6. Arquitetura Offline-First & Outbox Pattern
