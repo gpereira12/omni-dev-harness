@@ -44,13 +44,23 @@
    - **Abertura de PR:** Finalize gerando o Pull Request com resumo executivo em blocos.
 8. **Portão de Deploy com Aprovação Humana (HITL)**:
    - A IA é **ESTRITAMENTE PROIBIDA** de executar comandos de deploy em produção de forma autônoma. O ciclo da IA encerra na validação local do pipeline e entrega do relatório de release para validação e promoção pelo humano.
+9. **Isolamento de Ambientes Locais & Proibição de Commit de Bypasses Dev (Zero Dev-Leaks)**:
+   - Alterações feitas para conveniência ou testes em ambiente local (`DEV / AUTH_DEV`, bypasses de auth, mocks locais, injeção forçada de branding/tenant em `.env.development`) são **EXCLUSIVAS DE TEMPO DE EXECUÇÃO LOCAL (DEV-ONLY)**.
+   - É **TERMINANTEMENTE PROIBIDO** adicionar à staging (`git add`), comitar (`git commit`) ou incluir em Pull Requests arquivos `.env` modificados ou flags locais de bypass. Antes de qualquer commit, SEMPRE inspecione `git status` e reverta configurações de ambiente local.
+10. **Zero Mocks e Dados Estáticos em Produção (Zero Mock-Leaks)**:
+   - Registros estáticos, pedidos/usuários fictícios ou mocks de desenvolvimento (ex: `mockOrder`, `id: 'mock-*'`, fallbacks estáticos para teste de UI em componentes produtivos) são permitidos **EXCLUSIVAMENTE** em arquivos de testes automatizados (`*.test.*`, `*.spec.*`, `__tests__/`, `mocks/`).
+   - É **TERMINANTEMENTE PROIBIDO** commitar dados mockados em arquivos de produção. O sensor determinístico `.harness/hooks/pre-commit-check.sh` bloqueará commits com padrões de mock em arquivos de código produtivo.
 
 ---
 
 ## 3. Verificação de Tarefas (Definition of Done)
 
-Antes de considerar uma tarefa pronta:
-1. **Sensor de Código Determinístico**: Execute o validador local (`.harness/hooks/pre-commit-check.sh` ou `npm run check:all`).
-2. **Auto-Registro de Memória**: Ao solucionar bugs complexos ou estabelecer novos padrões, registre o aprendizado no MCP (`memory_write_page`) ou em `knowledge/lessons-learned/`.
-3. **Sincronização do GSD**: Atualize `.planning/STATE.md` com a atividade concluída e novo status.
-4. **Entrega em Blocos**: Proponha os commits atômicos em blocos e a abertura do PR.
+Antes de considerar uma tarefa pronta ou realizar qualquer commit/push:
+1. **Compilação Obrigatória (Build-First / Zero Broken Builds)**:
+   - Em projetos .NET / C#: Execute SEMPRE o build completo da solution (`dotnet build <Solution>.sln`). Nunca confie apenas na compilação do projeto de testes isolado.
+   - Em projetos Node / TypeScript: Execute `npm run build` ou `npm run typecheck`.
+   - É **TERMINANTEMENTE PROIBIDO** comitar código que quebre o build ou com membros duplicados (ex: CS0111).
+2. **Sensor de Código Determinístico & Zero Mocks**: Execute os testes pertinentes e os hooks locais (`.harness/hooks/pre-commit-check.sh`), garantindo que nenhum dado mockado ou bypass de dev esteja staged.
+3. **Auto-Registro de Memória**: Ao solucionar bugs complexos ou estabelecer novos padrões, registre o aprendizado no MCP (`memory_write_page`) ou em `knowledge/lessons-learned/`.
+4. **Sincronização do GSD**: Atualize `.planning/STATE.md` com a atividade concluída e novo status.
+5. **Entrega em Blocos**: Proponha os commits atômicos em blocos e a abertura do PR.

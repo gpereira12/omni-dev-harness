@@ -24,7 +24,8 @@ Antes de aprovar a arquitetura de qualquer novo módulo ou endpoint, avalie cont
 A segurança não é testada no final; ela é aplicada na raiz:
 - **Zero Secrets no Git**: Hooks bloqueiam commits contendo arquivos `.env`, chaves privadas ou tokens de API.
 - **Dependencies Scanning**: Dependabot / Snyk / Trivy roda automaticamente em todo PR para prevenir vulnerabilidades na cadeia de suprimentos (Supply Chain Attacks).
-- **Parameterized Queries**: 100% de consultas SQL através de Query Builders tipados (Kysely, Drizzle) ou ORMs seguros, eliminando SQL Injection.
+- **Parameterized Queries**: 100% de consultas SQL através de Query Builders tipados (Kysely, Drizzle) ou ORMs seguros (Prisma/Drizzle/EF Core), eliminando SQL Injection.
+- **Multi-Tenant Strict Isolation (Zero IgnoreQueryFilters)**: Em arquiteturas multi-tenant, os Global Query Filters (`TenantId` e `!Deleted`) são invioláveis. É estritamente proibido o uso de `IgnoreQueryFilters()` ou desativação de escopo de tenant em consultas.
 
 ---
 
@@ -58,3 +59,4 @@ A vulnerabilidade número 1 em APIs modernas é **Broken Object Level Authorizat
   SELECT * FROM orders WHERE id = :order_id;
   ```
 - **IDs Não-Sequenciais**: Proibido expor sequenciais inteiros (`1, 2, 3`). Usar exclusivamente UUIDv7 ou identificadores com prefixo de domínio (`ord_01h8x4...`).
+
