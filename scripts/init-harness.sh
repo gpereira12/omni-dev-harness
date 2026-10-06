@@ -59,5 +59,20 @@ if [ ! -d "$TARGET_DIR/mcp_dev" ]; then
   cp -R "$SCRIPT_DIR/mcp-template/"* "$TARGET_DIR/mcp_dev/"
 fi
 
+# 5. Registra os subagentes no Claude Code, que só descobre agentes em .claude/agents/ (exige frontmatter name/description)
+echo "🤖 [5/5] Registrando subagentes nativos do Claude Code em .claude/agents/..."
+mkdir -p "$TARGET_DIR/.claude/agents"
+skipped=""
+for agent in "$TARGET_DIR/.harness/agents/"*.md; do
+  if [ "$(head -n 1 "$agent" | tr -d '\r')" = "---" ]; then
+    cp "$agent" "$TARGET_DIR/.claude/agents/"
+  else
+    skipped="$skipped $(basename "$agent" .md)"
+  fi
+done
+if [ -n "$skipped" ]; then
+  echo "⚠️ Sem frontmatter (name/description), não registrados no Claude Code:$skipped"
+fi
+
 echo "✅ [OMNI HARNESS] Projeto '$PROJECT_NAME' equipado com sucesso com Governança e SDD!"
 echo "💡 Para rodar o sensor de código: .harness/hooks/pre-commit-check.sh"

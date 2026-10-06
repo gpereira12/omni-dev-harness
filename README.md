@@ -144,6 +144,7 @@ O script provisionará automaticamente:
 2. `.planning/` com subpastas `epics/`, `decisions/`, `specs/`, `templates/` e `BACKLOG.md`.
 3. `.harness/` com os hooks (`pre-commit-check.sh`, `guard-destructive-db.sh`, `hardening-sensor.sh`), subagentes, packs (`two-pack`, `four-pack`, `six-pack`) e esteira de handoffs.
 4. `mcp_dev/` configurado com ferramentas de desenvolvimento e consulta rápida de conhecimento.
+5. `.claude/agents/` com os subagentes de `.harness/agents/` que possuem frontmatter (`code-reviewer`, `architecture-advisor`, `schema-reviewer`), registrados como subagentes nativos do Claude Code — que só descobre agentes nessa pasta.
 
 ---
 
