@@ -694,9 +694,9 @@ function openTaskDetails(projectId, taskId) {
     currentRole.toUpperCase();
   const roleDescriptions = {
     specifier:
-      "Escrevendo contratos (.d.ts), interfaces e testes falhando (TDD Red)",
+      "Definindo contratos (.d.ts), interfaces, Zod schemas e fronteira de escopo (SDD)",
     coder:
-      "Implementando a solução mínima necessária para passar os testes (TDD Green)",
+      "Implementando a solução cirúrgica baseada na spec e validando pelos sensores",
     cleaner: "Aplicando Clean Code, modularização e formatação",
     refactorer:
       "Refatorando código para manter complexidade ciclomática M < 5 e DRY",

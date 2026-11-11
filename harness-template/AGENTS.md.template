@@ -50,6 +50,11 @@
 10. **Zero Mocks e Dados Estáticos em Produção (Zero Mock-Leaks)**:
    - Registros estáticos, pedidos/usuários fictícios ou mocks de desenvolvimento (ex: `mockOrder`, `id: 'mock-*'`, fallbacks estáticos para teste de UI em componentes produtivos) são permitidos **EXCLUSIVAMENTE** em arquivos de testes automatizados (`*.test.*`, `*.spec.*`, `__tests__/`, `mocks/`).
    - É **TERMINANTEMENTE PROIBIDO** commitar dados mockados em arquivos de produção. O sensor determinístico `.harness/hooks/pre-commit-check.sh` bloqueará commits com padrões de mock em arquivos de código produtivo.
+11. **Padrão Obrigatório de Componentes de UI (@obt/ui — Zero Reinvenção)**:
+   - Toda tela, listagem, filtro e formulário em projetos frontend DEVE reutilizar estritamente os componentes consolidados de `@obt/ui` (`OBTField`, `OBTSelect`, `OBTTableHeader`, `OBTTable`, `OBTEmptyState`, `OBTTablePagination`, `OBTIconTitlePrimary`). É proibido recriar inputs e tabelas crus com MUI puro quando os equivalentes oficiais existem.
+12. **Segurança de Autorização, Impersonação Exclusiva (SuperAdmin) & Proibição de Permissionamento Genérico (Zero Privilege Escalation)**:
+   - **Impersonate Exclusivo de Super Admin**: A funcionalidade de personificar outro usuário (Impersonate) é prerrogativa **ESTRITAMENTE EXCLUSIVA** do perfil `SuperAdmin` (com validação explícita em controller, middleware e service). É terminantemente proibido permitir que outros papéis iniciem impersonação ou que ocorra impersonação em cascata.
+   - **Proibição de Permissionamento Genérico**: É terminantemente proibido utilizar classes, políticas ou handlers genéricos de autorização para recursos de impacto crítico (impersonação, aprovações financeiras, reservas forçadas, alteração de perfis). Operações sensíveis exigem autorização nominal e explícita, nunca delegando privilégios por pools reflexivos ou agrupamentos automáticos frouxos.
 
 ---
 
@@ -64,3 +69,4 @@ Antes de considerar uma tarefa pronta ou realizar qualquer commit/push:
 3. **Auto-Registro de Memória**: Ao solucionar bugs complexos ou estabelecer novos padrões, registre o aprendizado no MCP (`memory_write_page`) ou em `knowledge/lessons-learned/`.
 4. **Sincronização do GSD**: Atualize `.planning/STATE.md` com a atividade concluída e novo status.
 5. **Entrega em Blocos**: Proponha os commits atômicos em blocos e a abertura do PR.
+6. **Auditoria de Autorização & RBAC (Anti-Privilege Escalation)**: Confirmar que novos endpoints/recursos não usam permissões genéricas para operações sensíveis e que o fluxo de impersonação permanece blindado e exclusivo para SuperAdmin.

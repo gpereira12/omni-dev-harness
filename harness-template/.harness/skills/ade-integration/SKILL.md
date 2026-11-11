@@ -58,17 +58,17 @@ O Omni-Forge **não substitui** sua ADE de preferência. Ele é a **camada de go
 ```bash
 # Agente Claude Code no worktree do specifier:
 
-# 1. Trabalha na spec e nos testes TDD Red
+# 1. Trabalha na spec técnica e contratos SDD
 # 2. Commita no worktree isolado
 git add -A
-git commit -m "handoff(T-001): failing tests for checkout-v2 flow"
+git commit -m "handoff(T-001): define contracts and acceptance criteria for checkout-v2 flow"
 
 # 3. Emite o handoff (Claude Code executa via /bash ou terminal)
 .harness/handoffs/omni-handoff.sh send \
   --from specifier \
   --to coder \
   --task T-001 \
-  --summary "Contracts + failing tests para checkout v2"
+  --summary "Contracts + SDD spec para checkout v2"
 
 # → Omni-Forge Dashboard detecta o novo handoff via file watcher
 # → Coder aparece na fila do Kanban

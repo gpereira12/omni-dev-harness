@@ -49,7 +49,7 @@ Para eliminar a contaminação de contexto e o viés de auto-aprovação de cód
 │             │                                                           │ scripts, CSS e spikes │
 ├─────────────┼───────────────────────────────────────────────────────────┼───────────────────────┤
 │ Four-Pack   │ Specifier ➔ Coder ➔ Refactorer ➔ Guardian                 │ Padrão (80% das tasks)│
-│             │ (TDD Red)    (TDD Green) (Clean/M<5)   (Multi-tenant/Lint)│ Novas features e APIs │
+│             │ (SDD/Contrato) (Cirúrgico) (Clean/M<5)   (Multi-tenant/Lint)│ Novas features e APIs │
 ├─────────────┼───────────────────────────────────────────────────────────┼───────────────────────┤
 │ Six-Pack    │ Specifier ➔ Coder ➔ Cleaner ➔ Architect ➔ Hardening ➔ QA  │ Módulos críticos,     │
 │             │ (Mutation Testing via Stryker + E2E Playwright obrigatório│ pagamentos e auth     │
@@ -57,7 +57,7 @@ Para eliminar a contaminação de contexto e o viés de auto-aprovação de cód
 ```
 
 ### Regras Inegociáveis da Esteira:
-1. **TDD Estrito (Red ➔ Green ➔ Refactor)**: O `Specifier` é estritamente proibido de escrever código de produção; ele escreve apenas contratos (`.d.ts`), tipos e testes falhando. O `Coder` só escreve o código estritamente necessário para passar os testes.
+1. **SDD & Escopo Estrito**: O `Specifier` é estritamente proibido de escrever código de produção; ele define a especificação técnica (SDD), os contratos (`.d.ts`), schemas Zod e a fronteira rígida de escopo (`Arquivos Afetados`). O `Coder` escreve a implementação estritamente necessária para cumprir a spec e passar os sensores determinísticos (`pre-commit-check.sh`).
 2. **Complexidade Ciclomática Máxima ($M < 5$)**: O `Refactorer/Cleaner` deve quebrar funções longas e condicionais aninhadas.
 3. **Isolamento Multi-Tenant Garantido**: O `Guardian` audita se toda e qualquer consulta SQL/Kysely contém `.where('tenant_id', '=', tenantId)`.
 

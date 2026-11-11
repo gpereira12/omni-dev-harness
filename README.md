@@ -110,7 +110,7 @@ O `omni-dev-harness` implementa um motor de especificação determinística para
 │                                OMNI-SDD LIFECYCLE                                       │
 ├─────────────────┬──────────────────┬──────────────────────┬─────────────────────────────┤
 │ 1. DISCOVERY    │ 2. PROPOSAL (ADR)│ 3. SPEC TÉCNICA (SDD)│ 4. EXECUÇÃO & VERIFICAÇÃO   │
-│ Coleta de fatos │ 2 Alternativas + │ Contrato de código,  │ TDD, implementação cirúrgica│
+│ Coleta de fatos │ 2 Alternativas + │ Contrato de código,  │ Implementação cirúrgica     │
 │ e evidências    │ Trade-offs       │ Arquivos afetados e  │ e sensor de DoD             │
 │ na codebase     │ e Decisão Final  │ Casos de Teste       │ (pre-commit-check.sh)       │
 └─────────────────┴──────────────────┴──────────────────────┴─────────────────────────────┘
@@ -168,7 +168,7 @@ O `omni-forge` é a **Torre de Controle Visual (Dashboard)** e CLI para orquestr
 
 ### Funcionalidades do Dashboard:
 - **Portão de ATTENTION**: Interrompe a esteira e solicita aprovação/rejeição humana antes de avançar fases críticas.
-- **Kanban da Linha de Montagem**: Exibe cards se movendo entre `SPECIFIER` (TDD Red) $\rightarrow$ `CODER` (TDD Green) $\rightarrow$ `REFACTORER` ($M < 5$) $\rightarrow$ `GUARDIAN` (Multi-tenant/Lint) $\rightarrow$ `DONE`.
+- **Kanban da Linha de Montagem**: Exibe cards se movendo entre `SPECIFIER` (SDD / Contrato) $\rightarrow$ `CODER` (Implementação Cirúrgica) $\rightarrow$ `REFACTORER` ($M < 5$) $\rightarrow$ `GUARDIAN` (Multi-tenant/Lint) $\rightarrow$ `DONE`.
 - **Work Queue & Telemetria**: Monitoramento em tempo real da esteira ativa, Git Worktrees e integridade do portão de atenção.
 - **Raio-X Técnico dos Cards**: Inspeção profunda de manifests JSON, worktrees físicos, hashes de commit e avanço de fase, operando em perfeita simbiose com o Antigravity IDE como arquiteto estratégico.
 

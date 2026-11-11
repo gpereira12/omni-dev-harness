@@ -1,6 +1,6 @@
 {
   "name": "four-pack",
-  "description": "Topologia padrão do OMNI (80% das tarefas). Separação estrita de TDD Red, TDD Green, Refatoração e Governança.",
+  "description": "Topologia padrão do OMNI (80% das tarefas). Separação estrita de Especificação SDD, Implementação Cirúrgica, Refatoração e Governança.",
   "roles": [
     {
       "id": "specifier",

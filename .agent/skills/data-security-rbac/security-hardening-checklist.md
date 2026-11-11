@@ -41,3 +41,16 @@ Este checklist deve ser validado por todo agente de IA e engenheiro antes de apr
 - [ ] **Indirect Prompt Injection**: Documentos e inputs externos são encapsulados em tags de dados não-confiáveis (`<untrusted_content>`).
 - [ ] **Denial of Wallet**: Quota estrita de tokens e chamadas de LLM por usuário/hora.
 - [ ] **Output Validation**: Todo output de modelo que aciona ferramentas de banco ou API passa por validação de schema **Zod** estrito.
+
+
+---
+
+## 6. Role-Based Access Control (RBAC), Impersonation & Privilege Escalation Defense
+- [ ] **Impersonation Lock (SuperAdmin Only)**:
+  - Funcionalidade de personificar usuário (Impersonate) é exclusiva e restrita ao perfil `SuperAdmin`.
+  - Validação ativa e em profundidade (Controller + Service + Token/Claims).
+  - Bloqueio contra impersonação em cascata (usuário já impersonado tentando iniciar nova sessão).
+- [ ] **Anti-Pattern de Permissionamento Genérico**:
+  - Recursos e ações de alto impacto (impersonate, finanças, cancelamentos, reservas, gestão de papéis/MFA) possuem permissões nominais e dedicadas.
+  - Proibido agrupar recursos sensíveis em interfaces ou handlers genéricos (`[Authorize(Policy = ActionsName.Create)]`).
+  - Proibido expor recursos críticos a geradores automáticos ou reflexivos de permissão (ex: `GetAllResourceValues()`) sem inclusão em listas estritas de restrição (`ResourceSuperAdminOnly`).

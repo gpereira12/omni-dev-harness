@@ -30,10 +30,10 @@ export interface NovaFuncionalidadeInput {
 }
 ```
 
-## 4. Casos de Teste (TDD - Red/Green)
-- [ ] **Teste 1**: Deve retornar status 200 quando os dados forem válidos.
-- [ ] **Teste 2**: Deve bloquear e retornar 400 quando o parâmetro X for inválido.
-- [ ] **Teste 3**: Deve garantir isolamento por `tenant_id`.
+## 4. Critérios de Aceitação & Cenários de Teste (DoD)
+- [ ] **Cenário 1**: Deve retornar status 200 quando os dados forem válidos.
+- [ ] **Cenário 2**: Deve bloquear e retornar 400 quando o parâmetro X for inválido.
+- [ ] **Cenário 3**: Deve garantir isolamento por `tenant_id`.
 
 ## 5. Definition of Done
 1. `npm run check:all` passando com 100% de sucesso.
