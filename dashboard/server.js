@@ -16,15 +16,46 @@ const previewProcesses = {
   storefront: null,
 };
 
+process.on("uncaughtException", (err) => {
+  console.error("⚠️ [UNCAUGHT EXCEPTION]", err.message);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("⚠️ [UNHANDLED REJECTION]", reason);
+});
+
 function killProcessGroup(proc) {
   if (!proc || !proc.pid) return;
   try {
-    process.kill(-proc.pid, "SIGKILL");
+    if (process.platform === "win32") {
+      execSync(`taskkill /F /T /PID ${proc.pid} 2>nul`, { stdio: "ignore" });
+    } else {
+      process.kill(-proc.pid, "SIGKILL");
+    }
   } catch (e) {
     try {
       proc.kill("SIGKILL");
     } catch (_) {}
   }
+}
+
+function killPort(port) {
+  try {
+    if (process.platform === "win32") {
+      const out = execSync(`netstat -ano | findstr :${port}`, { encoding: "utf8" });
+      const lines = out.split("\n").filter(Boolean);
+      for (const line of lines) {
+        const parts = line.trim().split(/\s+/);
+        const pid = parts[parts.length - 1];
+        if (pid && !isNaN(parseInt(pid, 10)) && parseInt(pid, 10) > 0) {
+          try {
+            execSync(`taskkill /F /PID ${pid} 2>nul`, { stdio: "ignore" });
+          } catch (_) {}
+        }
+      }
+    } else {
+      execSync(`lsof -ti :${port} | xargs kill -9 2>/dev/null || true`, { stdio: "ignore" });
+    }
+  } catch (_) {}
 }
 
 // Auto-detecção agnóstica do motor de teste E2E (Cypress, Playwright, WebdriverIO, npm scripts, etc.)
@@ -869,27 +900,29 @@ const server = http.createServer((req, res) => {
         fs.existsSync(path.join(project.path, ".git"))
       ) {
         try {
-          // 1. Tenta pegar diff uncommitted
-          rawDiff = execSync("git diff HEAD", {
-            cwd: targetDir,
-            encoding: "utf8",
-            maxBuffer: 1024 * 1024 * 5,
-          }).trim();
+          const runGit = (args) => {
+            try {
+              return execSync(`git ${args}`, {
+                cwd: targetDir,
+                encoding: "utf8",
+                stdio: ["pipe", "pipe", "ignore"],
+                maxBuffer: 1024 * 1024 * 5,
+              }).trim();
+            } catch {
+              return "";
+            }
+          };
 
-          // Se não houver uncommitted, tenta pegar o diff do último commit
+          rawDiff = runGit("diff HEAD");
           if (!rawDiff) {
-            rawDiff = execSync("git diff HEAD~1 HEAD 2>/dev/null || true", {
-              cwd: targetDir,
-              encoding: "utf8",
-              maxBuffer: 1024 * 1024 * 5,
-            }).trim();
+            rawDiff = runGit("diff HEAD~1 HEAD");
           }
 
-          // Stat dos arquivos
-          const numstat = execSync(
-            "git diff --numstat HEAD 2>/dev/null || git diff --numstat HEAD~1 HEAD 2>/dev/null || true",
-            { cwd: targetDir, encoding: "utf8" },
-          ).trim();
+          let numstat = runGit("diff --numstat HEAD");
+          if (!numstat) {
+            numstat = runGit("diff --numstat HEAD~1 HEAD");
+          }
+
           if (numstat) {
             fileStats = numstat
               .split("\n")
@@ -904,11 +937,25 @@ const server = http.createServer((req, res) => {
               });
           }
 
-          // Summary
-          const shortstat = execSync(
-            "git diff --shortstat HEAD 2>/dev/null || git diff --shortstat HEAD~1 HEAD 2>/dev/null || true",
-            { cwd: targetDir, encoding: "utf8" },
-          ).trim();
+          // Inclui arquivos não rastreados (untracked)
+          const untracked = runGit("status --porcelain");
+          if (untracked) {
+            untracked
+              .split("\n")
+              .map((l) => l.trim())
+              .filter((l) => l.startsWith("??"))
+              .forEach((l) => {
+                const f = l.substring(3).trim();
+                if (!fileStats.some((item) => item.file === f)) {
+                  fileStats.push({ file: f, additions: 1, deletions: 0 });
+                }
+              });
+          }
+
+          let shortstat = runGit("diff --shortstat HEAD");
+          if (!shortstat) {
+            shortstat = runGit("diff --shortstat HEAD~1 HEAD");
+          }
           summary =
             shortstat ||
             (fileStats.length
@@ -1009,11 +1056,15 @@ const server = http.createServer((req, res) => {
         let exitCode = 0;
 
         try {
-          output = execSync("npm test -- --run 2>&1 || npm test 2>&1", {
+          const testCmd =
+            process.platform === "win32"
+              ? "npm test"
+              : "npm test -- --run 2>&1 || npm test 2>&1";
+          output = execSync(testCmd, {
             cwd: targetDir,
             encoding: "utf8",
-            timeout: 30000,
-            maxBuffer: 1024 * 1024 * 3,
+            timeout: 120000,
+            maxBuffer: 1024 * 1024 * 5,
           });
           exitCode = 0;
         } catch (testErr) {
@@ -1175,9 +1226,11 @@ const server = http.createServer((req, res) => {
             previewProcesses.api = spawn("npm", ["run", "dev"], {
               cwd,
               env,
-              detached: true,
+              detached: process.platform !== "win32",
+              shell: true,
               stdio: "ignore",
             });
+            previewProcesses.api.on("error", (err) => console.error("⚠️ [API Preview Error]", err.message));
             previewProcesses.api.unref();
             started.push("API (3010)");
           }
@@ -1196,9 +1249,11 @@ const server = http.createServer((req, res) => {
             previewProcesses.app = spawn("npx", ["vite", "--port", "5183"], {
               cwd,
               env,
-              detached: true,
+              detached: process.platform !== "win32",
+              shell: true,
               stdio: "ignore",
             });
+            previewProcesses.app.on("error", (err) => console.error("⚠️ [App Preview Error]", err.message));
             previewProcesses.app.unref();
             started.push("App (5183)");
           }
@@ -1223,9 +1278,11 @@ const server = http.createServer((req, res) => {
             previewProcesses.storefront = spawn("npm", ["run", "dev"], {
               cwd,
               env,
-              detached: true,
+              detached: process.platform !== "win32",
+              shell: true,
               stdio: "ignore",
             });
+            previewProcesses.storefront.on("error", (err) => console.error("⚠️ [Storefront Preview Error]", err.message));
             previewProcesses.storefront.unref();
             started.push("Storefront (4010)");
           }
@@ -1257,9 +1314,7 @@ const server = http.createServer((req, res) => {
             previewProcesses.api = null;
             stopped.push("api");
           }
-          try {
-            execSync("lsof -ti :3010 | xargs kill -9 2>/dev/null || true");
-          } catch (_) {}
+          killPort(3010);
         }
 
         if (!service || service === "app" || service === "all") {
@@ -1268,9 +1323,7 @@ const server = http.createServer((req, res) => {
             previewProcesses.app = null;
             stopped.push("app");
           }
-          try {
-            execSync("lsof -ti :5183 | xargs kill -9 2>/dev/null || true");
-          } catch (_) {}
+          killPort(5183);
         }
 
         if (!service || service === "storefront" || service === "all") {
@@ -1279,9 +1332,7 @@ const server = http.createServer((req, res) => {
             previewProcesses.storefront = null;
             stopped.push("storefront");
           }
-          try {
-            execSync("lsof -ti :4010 | xargs kill -9 2>/dev/null || true");
-          } catch (_) {}
+          killPort(4010);
         }
 
         broadcastEvent({ type: "PREVIEW_STATUS_CHANGED" });
@@ -1315,10 +1366,23 @@ const server = http.createServer((req, res) => {
 
       let changedFiles = [];
       try {
-        const out = execSync(
-          "git diff --name-only HEAD~1 HEAD 2>/dev/null || git status -s 2>/dev/null | awk '{print $2}' || true",
-          { cwd: targetDir, encoding: "utf8" },
-        ).trim();
+        let out = "";
+        try {
+          out = execSync("git diff --name-only HEAD", {
+            cwd: targetDir,
+            encoding: "utf8",
+            stdio: ["pipe", "pipe", "ignore"],
+          }).trim();
+        } catch (_) {}
+        if (!out) {
+          try {
+            out = execSync("git diff --name-only HEAD~1 HEAD", {
+              cwd: targetDir,
+              encoding: "utf8",
+              stdio: ["pipe", "pipe", "ignore"],
+            }).trim();
+          } catch (_) {}
+        }
         changedFiles = out.split("\n").filter(Boolean);
       } catch (_) {}
 
